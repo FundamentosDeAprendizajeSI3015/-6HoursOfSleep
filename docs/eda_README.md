@@ -1,4 +1,4 @@
-# 🔵 Deserción Estudiantil EDA — Análisis Exploratorio de Datos
+# Análisis Exploratorio de Datos - Isabella
 
 > **Rama/Enfoque:** Análisis Exploratorio de Datos (EDA)
 > **Objetivo:** Realizar un análisis detallado de los datos disponibles para comprender las variables, evaluar la calidad de los datos, identificar patrones, descubrir relaciones y detectar posibles problemas como data leakage, con el fin de preparar el dataset para el modelado predictivo.
