@@ -1,23 +1,15 @@
-"""
-index_builder.py
-================
-Construcción del índice de vulnerabilidad económica-educativa.
-Responsable: Isabela | Rama: feature/unsupervised-index
+# ================
+# Construcción del índice de vulnerabilidad económica-educativa.
 
-El índice es una combinación lineal de variables económicas que resume
-el nivel de riesgo de deserción estudiantil para cada departamento-año.
+# El índice es una combinación lineal de variables económicas que resume
+# el nivel de riesgo de deserción estudiantil para cada departamento-año.
 
-Flujo:
-1. Carga del dataset y limpieza según EDA
-2. Construcción de PCA y clustering
-3. Validación de etiquetas
-4. Índice por PCA y teórico
-5. Exportación a data/final
-
-Dos enfoques para el índice:
-- PCA: pesos automáticos desde la primera componente principal
-- Teórico: pesos definidos por literatura económica
-"""
+# Flujo:
+# 1. Carga del dataset y limpieza según EDA
+# 2. Construcción de PCA y clustering
+# 3. Validación de etiquetas
+# 4. Índice por PCA y teórico
+# 5. Exportación a data/final
 
 import os
 import sys
