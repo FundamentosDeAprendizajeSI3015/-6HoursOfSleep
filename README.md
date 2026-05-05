@@ -1,6 +1,6 @@
-# 🟣 feature/unsupervised-index — Isabela
+# feature/unsupervised-index — Isabella
 
-> Rama a cargo de: **Isabela**
+> Rama a cargo de: **Isabella**
 > Objetivo: Análisis no supervisado para validar etiquetas + construcción del índice de vulnerabilidad económica-educativa como combinación lineal de variables.
 
 ---
