@@ -16,48 +16,62 @@ Construir un pipeline completo de ML que permita:
 
 ## 🗂️ Estructura del repositorio
 
-```
+```text
 desercion-economica-col/
 │
-├── README.md                        ← Este archivo
+├── README.md
 │
 ├── data/
 │   ├── raw/                         ← Datos originales sin modificar
-│   │   ├── .gitkeep
-│   │   └── fuentes.md               ← Documentación de fuentes
 │   ├── processed/                   ← Datos limpios y transformados
-│   │   └── .gitkeep
-│   └── interim/                     ← Datos intermedios
-│       └── .gitkeep
+│   └── final/                       ← Datos finales listos para modelado
 │
-├── notebooks/
-│   ├── 01_carga_exploracion/        ← SANTI
-│   ├── 02_unsupervised_indice/      ← ISABELA
-│   └── 03_modelos_supervisados/     ← JUANES
-│
-├── src/
-│   ├── data_loader.py               ← SANTI
-│   ├── preprocessing.py             ← SANTI
-│   ├── index_builder.py             ← ISABELA
-│   ├── models.py                    ← JUANES
-│   └── evaluation.py                ← JUANES
-│
-├── reports/
-│   └── figures/                     ← Gráficas exportadas
-│
+├── load-data/
+|
+├── eda/
+|
+├── indexes-scores/
+|
+├── supervised/
+|
+├── unsupervised/
+|
 ├── requirements.txt
+|
 └── .gitignore
 ```
+
+### Organización del proyecto
+
+Cada etapa del proyecto se encuentra organizada en una carpeta independiente correspondiente a su rama:
+
+- `load-data`
+- `eda`
+- `indexes-scores`
+- `supervised`
+- `unsupervised`
+
+Las etapas comparten la misma estructura interna:
+
+- `src/` → Código fuente y scripts principales.
+- `docs/` → Documentación y README específicos de la etapa.
+- `reports/` → Gráficas, resultados y salidas generadas.
+
+La carpeta global `data/` centraliza los datasets utilizados en todo el proyecto:
+
+- `raw/` → Datos originales.
+- `processed/` → Datos transformados y limpios.
+- `final/` → Datos finales preparados para análisis y modelado junto a un **README.md** con toda la información de la carga y procesamiento de datos.
 
 ---
 
 ## Equipo y responsabilidades
 
-| Integrante        | Rama                           | Responsabilidad                    |
-| ----------------- | ------------------------------ | ---------------------------------- |
-| **Santi**   | `feature/data-pipeline`      | Carga, limpieza y EDA              |
-| **Isabela** | `feature/unsupervised-index` | Análisis no supervisado + índice |
-| **Juanes**  | `feature/supervised-models`  | Modelos supervisados + evaluación |
+| Integrante        | Responsabilidad                    |
+| ----------------- | ---------------------------------- |
+| **Santi**   | Carga, limpieza y EDA              |
+| **Isabella** | Análisis no supervisado + índice |
+| **Juanes**  | Modelos supervisados + evaluación |
 
 ---
 
@@ -68,7 +82,7 @@ desercion-economica-col/
       ↓
 [01. Carga & Preprocesamiento]  ← Santi
       ↓
-[02. EDA + Índice compuesto]    ← Isabela
+[02. EDA + Índice compuesto]    ← Isabella
       ↓
 [03. Modelos supervisados]      ← Juanes
       ↓
@@ -145,8 +159,8 @@ pip install -r requirements.txt
 ## 📅 Estado del proyecto
 
 * [X] Estructura del repositorio
-* [ ] Recolección de datos
-* [ ] Preprocesamiento (Santi)
-* [ ] EDA + índice (Isabela)
-* [ ] Modelos supervisados (Juanes)
+* [X] Recolección de datos
+* [X] Preprocesamiento (Santi)
+* [X] EDA + índice (Isabela)
+* [X] Modelos supervisados (Juanes)
 * [ ] Reporte final
