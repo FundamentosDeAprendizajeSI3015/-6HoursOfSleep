@@ -27,10 +27,10 @@ from sklearn.preprocessing import StandardScaler
 
 # ── Rutas ─────────────────────────────────────────────────────────────────────
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 DATA_PROCESSED = BASE_DIR / "data" / "processed"
 DATA_FINAL = BASE_DIR / "data" / "final"
-REPORTS_DIR = BASE_DIR / "reports" / "ind_figures"
+REPORTS_DIR = Path("../reports")
 
 # Crear carpeta final si no existe
 DATA_FINAL.mkdir(parents=True, exist_ok=True)
