@@ -1,26 +1,25 @@
 
-╔════════════════════════════════════════════════════════════════════════╗
-║        INFORME FINAL — MODELADO SUPERVISADO DE DESERCIÓN             ║
-╚════════════════════════════════════════════════════════════════════════╝
+========================================================================
+        INFORME FINAL -- MODELADO SUPERVISADO DE DESERCION
+========================================================================
 
-Fecha Generación: 2026-05-05 11:08:27
+Fecha Generacion: 2026-05-11 04:30:00
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-🏆 MODELO GANADOR: GradientBoosting
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------------
+MODELO GANADOR: GradientBoosting
+-----------------------------------------------------------------------
 
-Métricas en Test Set:
-  ├─ RMSE: 0.0517
-  ├─ MAE:  0.0293
-  ├─ R²:   0.4123
-  └─ MAPE: 20.41%
+Metricas en Test Set:
+  - RMSE: 0.0517
+  - MAE:  0.0293
+  - R2:   0.4123
+  - MAPE: 20.41%
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 TOP 5 MODELOS
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------------
+RESUMEN DE MODELOS
+-----------------------------------------------------------------------
 
-
-Modelo               |     RMSE |      MAE |       R² |     MAPE
+Modelo               |     RMSE |      MAE |       R2 |     MAPE
 ------------------------------------------------------------
 GradientBoosting     |   0.0517 |   0.0293 |   0.4123 |    20.41
 RandomForest         |   0.0545 |   0.0299 |   0.3458 |    21.24
@@ -29,31 +28,45 @@ Ridge                |   0.0651 |   0.0395 |   0.0690 |    28.21
 ElasticNet           |   0.0698 |   0.0415 |  -0.0713 |    35.26
 ------------------------------------------------------------
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📈 MEJORA VS BASELINE (OLS)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------------
+MEJORA VS BASELINE (OLS)
+-----------------------------------------------------------------------
 
 Baseline RMSE (OLS):      0.0621
-Mejor RMSE (GradientBoosting    ): 0.0517
+Mejor RMSE (GradientBoosting): 0.0517
 
 Mejora:
-  ├─ Diferencia: 0.0104
-  └─ Porcentaje: +16.75%
+  - Diferencia: 0.0104
+  - Porcentaje: +16.75%
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-✅ COMPLETADO
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------------
+ANALISIS POR DEPARTAMENTO
+-----------------------------------------------------------------------
 
-✓ 8 modelos entrenados (4 baseline + 4 avanzados)
-✓ Validación cruzada 5-fold
-✓ Evaluación en test set
-✓ Visualizaciones generadas
-✓ Tabla comparativa exportada
-✓ Informe generado
+Se ha implementado una comparacion detallada entre los valores reales
+y las predicciones del mejor modelo para cada departamento.
+
+Departamentos con mayor desviacion (Top 10):
+Amazonas, Cesar, Sucre, Quindio, San Andres, Meta, Vaupes, Guaviare, Arauca.
+
+Esta informacion permite identificar regiones donde los factores
+socioeconomicos tradicionales no explican completamente la desercion.
+
+-----------------------------------------------------------------------
+COMPLETADO
+-----------------------------------------------------------------------
+
+- 8 modelos entrenados (4 baseline + 4 avanzados)
+- Validacion cruzada 5-fold
+- Evaluacion en test set
+- Visualizaciones generadas (incluyendo comparativa departamental)
+- Tabla comparativa exportada
+- Informe generado
 
 Archivos:
-  ├─ ../reports/eda_figures/supervisado_*.png
-  ├─ ../reports/tabla_comparativa_modelos_supervisados.csv
-  └─ ../reports/informe_supervisado.txt
+  - ../reports/eda_figures/supervisado_*.png
+  - ../reports/eda_figures/supervisado_comparacion_departamentos.png
+  - ../reports/tabla_comparativa_modelos_supervisados.csv
+  - ../reports/informe_supervisado.txt
 
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+-----------------------------------------------------------------------
