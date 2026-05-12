@@ -48,14 +48,16 @@ Cada etapa del proyecto se encuentra organizada en una carpeta independiente cor
 - `load-data`
 - `eda`
 - `indexes-scores`
-- `supervised`
 - `unsupervised`
+- `supervised`
 
 Las etapas comparten la misma estructura interna:
 
 - `src/` → Código fuente y scripts principales.
 - `docs/` → Documentación y README específicos de la etapa.
 - `reports/` → Gráficas, resultados y salidas generadas.
+
+La etapa `unsupervised` explora patrones y clusters en los indicadores socioeconómicos para apoyar el modelado supervisado de la tasa de deserción.
 
 La carpeta global `data/` centraliza los datasets utilizados en todo el proyecto:
 
@@ -84,7 +86,9 @@ La carpeta global `data/` centraliza los datasets utilizados en todo el proyecto
       ↓
 [02. EDA + Índice compuesto]    ← Isabella
       ↓
-[03. Modelos supervisados]      ← Juanes
+[03. Análisis no supervisado]   ← Santi
+      ↓
+[04. Modelos supervisados]      ← Juanes
       ↓
 [Reporte de resultados]
 ```
@@ -162,5 +166,6 @@ pip install -r requirements.txt
 * [X] Recolección de datos
 * [X] Preprocesamiento (Santi)
 * [X] EDA + índice (Isabela)
+* [X] Análisis no supervisado (Isabela)
 * [X] Modelos supervisados (Juanes)
 * [ ] Reporte final
