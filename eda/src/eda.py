@@ -12,8 +12,8 @@ import seaborn as sns
 from pathlib import Path
 
 # ---- Configuración ----
-DATASET_PATH = '../data/processed/panel_desercion_socioeconomico_completo 1.csv'
-OUTPUT_DIR = '../reports/eda_figures'
+DATASET_PATH = '../../data/processed/panel_desercion_socioeconomico_completo 1.csv'
+OUTPUT_DIR = '../reports'
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 sns.set_theme(style="whitegrid", palette="muted")
