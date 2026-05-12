@@ -5,6 +5,7 @@ Runner principal del pipeline no supervisado.
 Responsable: Equipo no supervisado
 
 Flujo:
+0. Definir objetivo de apoyo a la predicción supervisada de deserción
 1. Cargar datos y prepararlos para clustering
 2. Escalar features numéricas
 3. Ejecutar K-Means y seleccionar k óptimo
@@ -36,6 +37,7 @@ from Clustering import (
 def main():
     print("\n" + "="*70)
     print("🎯 PIPELINE NO SUPERVISADO - CLUSTERING DE DESERCIÓN")
+    print("Objetivo: explorar patrones en los indicadores que puedan apoyar la predicción de la tasa de deserción estudiantil.")
     print("="*70)
 
     X, y, loader = load_and_prepare()
@@ -54,6 +56,8 @@ def main():
         guardar=True,
     )
     export_cluster_assignments(df_base, kmeans_labels, "KMeans")
+    kmeans_counts = pd.Series(kmeans_labels).value_counts().sort_index()
+    print(f"   K-Means counts: {kmeans_counts.to_dict()}")
 
     print("\n[2/5] DBSCAN")
     dbscan_results, dbscan_model = run_dbscan_grid(X_scaled)
@@ -67,6 +71,10 @@ def main():
             guardar=True,
         )
         export_cluster_assignments(df_base, dbscan_labels, "DBSCAN")
+        dbscan_counts = pd.Series(dbscan_labels).value_counts().sort_index()
+        noise_pct = 100 * dbscan_counts.get(-1, 0) / len(dbscan_labels)
+        print(f"   DBSCAN counts: {dbscan_counts.to_dict()}")
+        print(f"   Ruido: {dbscan_counts.get(-1, 0)} observaciones ({noise_pct:.1f}% del dataset)")
     else:
         dbscan_labels = None
         print("   [WARNING] No se guardaron resultados DBSCAN debido a falta de configuración válida.")
@@ -83,6 +91,8 @@ def main():
         guardar=True,
     )
     export_cluster_assignments(df_base, agg_labels, "Agglomerative")
+    agg_counts = pd.Series(agg_labels).value_counts().sort_index()
+    print(f"   Agglomerative counts: {agg_counts.to_dict()}")
 
     print("\n[4/5] Validación de etiquetas (si está disponible)")
     y_cat = None

@@ -1,22 +1,8 @@
 # Conclusiones — Análisis No Supervisado
 
-## Resumen del pipeline
+## Objetivo del módulo
 
-La etapa no supervisada del proyecto aplicó clustering sobre el dataset final con tres algoritmos:
-
-- `KMeans` con selección de `k` óptimo
-- `DBSCAN` con búsqueda de `eps` y `min_samples`
-- `AgglomerativeClustering` con el mismo número de clusters de K-Means
-
-Los resultados se guardaron en:
-
-- `unsupervised/reports/eda_figures/unsupervised_kmeans_pca.png`
-- `unsupervised/reports/eda_figures/unsupervised_dbscan_pca.png`
-- `unsupervised/reports/eda_figures/unsupervised_agglomerative_pca.png`
-- `unsupervised/reports/cluster_assignments_KMeans.csv`
-- `unsupervised/reports/cluster_assignments_DBSCAN.csv`
-- `unsupervised/reports/cluster_assignments_Agglomerative.csv`
-- `unsupervised/reports/unsupervised_validation_summary.csv`
+El objetivo de esta etapa no supervisada es apoyar la predicción de la tasa de deserción estudiantil en Colombia. Este análisis busca explorar patrones en los indicadores socioeconómicos y educativos, identificar grupos de departamentos con características similares y validar si esa estructura de datos es consistente con la variable objetivo de deserción.
 
 ## Resultados principales
 
@@ -27,16 +13,16 @@ Los resultados se guardaron en:
   - Cluster 0: 32 observaciones
   - Cluster 1: 32 observaciones
   - Cluster 2: 2 observaciones
-- Interpretación: K-Means encontró dos grupos grandes y un pequeño grupo residual.
+- Interpretación: K-Means encontró dos grupos grandes y un grupo muy reducido. Esto sugiere una segmentación global en los datos, pero no implica una predicción directa de la tasa de deserción.
 
-### Agglomerative
+### Agglomerative Clustering
 
 - Número de clusters: 3
 - Distribución de clusters:
   - Cluster 0: 32 observaciones
   - Cluster 1: 32 observaciones
   - Cluster 2: 2 observaciones
-- Interpretación: El clustering jerárquico produjo una segmentación casi idéntica a K-Means, lo que sugiere una estructura estable de tres grupos en el espacio de features escaladas.
+- Interpretación: El clustering jerárquico coincide casi exactamente con K-Means, lo que refuerza la existencia de una estructura estable de tres grupos en el espacio de features escaladas.
 
 ### DBSCAN
 
@@ -46,42 +32,53 @@ Los resultados se guardaron en:
   - Cluster 0: 3 observaciones
   - Cluster 1: 4 observaciones
   - Ruido (-1): 59 observaciones
-- Interpretación: El modelo de densidad detectó muy pocos grupos densos y clasificó la mayoría del dataset como ruido, lo que indica que la distribución actual de las variables no es fácilmente separable con el umbral de densidad usado.
+- Interpretación: DBSCAN detecta muy pocos núcleos densos y clasifica la mayoría de las observaciones como ruido. En este caso, DBSCAN no es una buena opción para segmentar el dataset completo.
 
-## Validación y correspondencia con la variable objetivo
+## Relación con la tasa de deserción
 
 - `KMeans` ARI: 0.0014
 - `Agglomerative` ARI: 0.0014
 - `DBSCAN` ARI: 1.0000
 
-### Observaciones de validación
+### Qué indican estos valores
 
-- Los valores ARI muy bajos para K-Means y Agglomerative muestran que los grupos encontrados no coinciden significativamente con las categorías derivadas del target.
-- El ARI perfecto para DBSCAN sugiere que el conjunto reducido de observaciones no-ruido coincide exactamente con las etiquetas cuando se compara con la variable objetivo, pero este resultado debe interpretarse con cuidado debido al alto porcentaje de puntos tratados como ruido.
+- KMeans y Agglomerative muestran una coincidencia muy baja con las categorías derivadas del target de deserción. Esto significa que los grupos encontrados no están alineados directamente con la tasa de deserción estudiantil.
+- DBSCAN tiene un ARI perfecto solo sobre el subconjunto no-ruido (7 observaciones), por lo que ese resultado no respalda una relación general entre los clusters y la variable objetivo.
 
-## Interpretación general
+## Conclusión principal
 
-- La presencia de dos clusters grandes y uno pequeño en K-Means y Agglomerative sugiere que existen patrones globales fuertes en el dataset.
-- DBSCAN evidencia que la estructura local de densidad es débil, ya que muchas observaciones no parecen pertenecer a grupos densos bien definidos.
-- Es probable que la variabilidad de los indicadores macro y socioeconómicos genere grupos amplios más que clusters densos y bien separados.
+El análisis no supervisado aporta un diagnóstico útil, pero no sustituye el modelado supervisado para predecir la tasa de deserción.
 
-## Limitaciones
+- KMeans y Agglomerative son valiosos para explorar grupos de departamentos similares en términos de indicadores.
+- Sin embargo, la baja correspondencia con el target sugiere que, para predecir deserción, se requiere un enfoque supervisado que use explícitamente la variable objetivo.
+- DBSCAN no es apropiado como método de segmentación general en este conjunto de datos debido a la alta proporción de ruido.
 
-1. **Alta proporción de ruido en DBSCAN**
-   - 59 de 66 observaciones fueron etiquetadas como ruido.
-   - Esto limita el valor de DBSCAN en el contexto actual.
+## Lecciones claves
 
-2. **Cluster pequeño en K-Means/Agglomerative**
-   - Solo 2 observaciones forman el tercer grupo.
-   - Puede ser un outlier o un segmento muy específico.
+1. **Clustering como herramienta exploratoria**
+   - El clustering ayuda a encontrar patrones estructurales, no a predecir directamente la deserción.
 
-3. **ARI bajo para los modelos de partición**
-   - Los clusters no reflejan el target de deserción en términos de categorías derivadas.
+2. **Estructura de datos vs. objetivo**
+   - La estructura que mejor capturan KMeans y Agglomerative no está estrechamente ligada a la tasa de deserción.
 
-## Recomendaciones
+3. **DBSCAN debe usarse con precaución**
+   - En este dataset, la mayoría de los puntos se consideran ruido, por lo que el método no aporta segmentaciones útiles para el objetivo principal.
 
-- Usar `KMeans` y `Agglomerative` como herramientas exploratorias iniciales, pero no como segmentación final sin más refinamiento.
-- Explorar nuevas combinaciones de features y transformaciones antes de repetir DBSCAN.
-- Evaluar si el clustering es útil para análisis de grupos de departamentos o si el dataset requiere más variables relevantes.
-- Considerar técnicas de reducción de dimensionalidad más avanzadas (como UMAP) para analizar visualmente la separación de clusters.
+## Recomendaciones para el proyecto
 
+- Mantener el pipeline supervisado como la solución principal para predecir tasa de deserción.
+- Usar los clusters de KMeans/Agglomerative como variables de apoyo o para análisis de grupos similares.
+- No basar decisiones de predicción únicamente en DBSCAN.
+- Evaluar el valor de los grupos detectados para la ingeniería de features y la segmentación de departamentos.
+
+## Próximos pasos en el contexto de la predicción de deserción
+
+1. Usar los clusters como nuevas variables en el modelo supervisado.
+2. Probar si la etiqueta de cluster mejora el rendimiento del modelo de deserción.
+3. Generar variables derivadas adicionales que capturen mejor la heterogeneidad regional.
+4. Revisar los departamentos del cluster pequeño para ver si representan casos atípicos con alto riesgo.
+5. Combinar este análisis exploratorio con el pipeline supervisado para obtener predicciones más robustas.
+
+---
+
+*Documento actualizado con base en los resultados del pipeline no supervisado y el objetivo de predecir la tasa de deserción estudiantil en Colombia.*
