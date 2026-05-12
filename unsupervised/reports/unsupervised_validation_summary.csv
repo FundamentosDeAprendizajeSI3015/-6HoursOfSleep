@@ -1,0 +1,4 @@
+algorithm,n_clusters,adjusted_rand_index
+KMeans,3,0.0013966480446927375
+DBSCAN,2,1.0
+Agglomerative,3,0.0013966480446927375
