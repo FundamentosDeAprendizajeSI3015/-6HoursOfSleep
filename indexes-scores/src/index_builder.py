@@ -27,7 +27,7 @@ from sklearn.preprocessing import StandardScaler
 
 # ── Rutas ─────────────────────────────────────────────────────────────────────
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 DATA_PROCESSED = BASE_DIR / "data" / "processed"
 DATA_FINAL = BASE_DIR / "data" / "final"
 REPORTS_DIR = BASE_DIR / "reports" / "ind_figures"
@@ -436,35 +436,53 @@ def generar_visualizaciones(df: pd.DataFrame,
         
         # 1b. Biplot PC1 vs PC2
         if X_pca.shape[1] >= 2 and variables and len(variables) > 0:
-            fig, ax = plt.subplots(figsize=(11, 8))
+            fig, ax = plt.subplots(figsize=(12, 9))
             
             # Plotear observaciones coloreadas por outcome
             colors = df.loc[idx_pca, "outcome_tasa_desercion_snies"].fillna(0)
             scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=colors, cmap='RdYlGn_r',
                                s=80, alpha=0.6, edgecolors='black', linewidth=0.5)
             
-            # Plotear flechas de cargas (loadings)
+            # Plotear flechas de cargas (loadings) con etiquetas sin sobreposición
             loadings = pca.components_.T * np.sqrt(pca.explained_variance_)
-            for i, var in enumerate(variables[:7]):  # Limitar a 7 variables por claridad
-                ax.arrow(0, 0, loadings[i, 0]*3, loadings[i, 1]*3,
-                        head_width=0.15, head_length=0.15, fc='red', ec='red', alpha=0.6)
-                ax.text(loadings[i, 0]*3.3, loadings[i, 1]*3.3, var[:18],
-                       fontsize=7, ha='center', va='center',
-                       bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.3))
+            n_vars = min(len(variables), 7)  # Limitar a 7 variables por claridad
+            
+            # Calcular ángulos para distribuir etiquetas uniformemente
+            for i, var in enumerate(variables[:n_vars]):
+                arrow_len = 3.0
+                # Flecha
+                ax.arrow(0, 0, loadings[i, 0]*arrow_len, loadings[i, 1]*arrow_len,
+                        head_width=0.15, head_length=0.15, fc='red', ec='red', alpha=0.7, zorder=3)
+                
+                # Posicionar etiqueta a mayor distancia para evitar sobreposición
+                label_distance = 4.2
+                ax.text(loadings[i, 0]*label_distance, loadings[i, 1]*label_distance, 
+                       var[:20],
+                       fontsize=8, ha='center', va='center', weight='bold',
+                       bbox=dict(boxstyle='round,pad=0.4', facecolor='yellow', 
+                                alpha=0.75, edgecolor='red', linewidth=1),
+                       zorder=4)
+                
+                # Línea de conexión desde punta de flecha a etiqueta (opcional, para claridad)
+                ax.plot([loadings[i, 0]*arrow_len, loadings[i, 0]*label_distance],
+                       [loadings[i, 1]*arrow_len, loadings[i, 1]*label_distance],
+                       'r--', alpha=0.4, linewidth=0.8, zorder=2)
             
             ax.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.3)
             ax.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.3)
-            ax.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%})')
-            ax.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%})')
-            ax.set_title('Biplot PCA - Observaciones y Cargas de Variables')
+            ax.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%})', fontsize=12, weight='bold')
+            ax.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%})', fontsize=12, weight='bold')
+            ax.set_title('Biplot PCA - Observaciones y Cargas de Variables', fontsize=13, weight='bold', pad=20)
             
             cbar = plt.colorbar(scatter, ax=ax)
-            cbar.set_label('Outcome', rotation=270, labelpad=20)
+            cbar.set_label('Tasa de Deserción', rotation=270, labelpad=20)
             
+            ax.grid(True, alpha=0.2)
             plt.tight_layout()
             plt.savefig(REPORTS_DIR / '01b_biplot_pca.png', dpi=150, bbox_inches='tight')
             plt.close()
             print(f"   [Guardado] 01b_biplot_pca.png")
+    
     
     # 2. Índice PCA vs Outcome
     if "indice_vulnerabilidad_pca" in df.columns and "outcome_tasa_desercion_snies" in df.columns:
