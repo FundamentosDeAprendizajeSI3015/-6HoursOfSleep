@@ -1,0 +1,106 @@
+================================================================================
+REPORTE DE SIMULACIÓN - DATASET SOCIOECONÓMICO COLOMBIA (1980-2024)
+================================================================================
+
+Generado: 2026-05-17 17:59:00
+
+================================================================================
+1. DIMENSIONES DEL DATASET
+================================================================================
+Registros totales: 1,551
+Columnas: 33
+Período: 1980-2026 (47 años)
+Departamentos: 33
+
+================================================================================
+2. ESTADÍSTICAS DESCRIPTIVAS
+================================================================================
+
+pib_total_miles_millones_cop:
+  Media: 189487.76
+  Std:   171734.43
+  Min:   22235.87
+  Max:   1549064.46
+
+total_matriculados:
+  Media: 34133.19
+  Std:   37260.67
+  Min:   8199.40
+  Max:   343972.77
+
+outcome_tasa_desercion_snies:
+  Media: 10.18
+  Std:   2.01
+  Min:   4.10
+  Max:   17.87
+
+ipc_nacional_total_var_mensual_media:
+  Media: 1.25
+  Std:   0.95
+  Min:   0.21
+  Max:   3.50
+
+geih_td_nacional_media_anual:
+  Media: 13.35
+  Std:   1.94
+  Min:   10.48
+  Max:   17.93
+
+================================================================================
+3. DATOS FALTANTES
+================================================================================
+pib_variacion_pct_anual_vs_anio_previo            :     33 ( 2.13%)
+var_pct_matriculados_vs_anio_previo               :     33 ( 2.13%)
+
+================================================================================
+4. DISTRIBUCIONES UTILIZADAS POR VARIABLE
+================================================================================
+
+pib_total_miles_millones_cop:
+  Lognormal (tendencia logística + ruido log)
+
+pib_variacion_pct_anual:
+  Normal derivada (cambio año a año)
+
+total_admitidos:
+  Poisson (eventos discretos)
+
+total_matriculados:
+  Normal (suavizado)
+
+ratio_matriculados_sobre_admitidos:
+  Normal derivada
+
+ipc_nacional_*:
+  Normal por régimen (1980-90: alta, 1991-00: media, 2001-24: baja)
+
+geih_td:
+  Normal + ciclos económicos (8 años)
+
+geih_to:
+  Normal inversa a TD
+
+geih_tgp:
+  Normal con tendencia creciente (feminización)
+
+outcome_tasa_desercion:
+  Beta con variación departamental
+
+================================================================================
+5. EVENTOS HISTÓRICOS SIMULADOS
+================================================================================
+1999: Crisis bancaria colombiana
+2008: Crisis financiera global
+2020: Pandemia COVID-19
+2022: Inflación post-COVID
+
+================================================================================
+6. FACTORES DE ESCALA POR DEPARTAMENTO
+================================================================================
+Antioquia                               : 1.2x   - Antioquia (segundo mayor PIB)
+Bogotá D.C.                             : 5.0x   - Bogotá D.C. (mayor PIB y población)
+Atlántico                               : 0.5x   - Atlántico
+Santander                               : 0.8x   - Santander
+Valle del Cauca                         : 1.0x   - Valle del Cauca
+La Guajira                              : 0.6x   - La Guajira (mayor vulnerabilidad)
+Chocó                                   : 0.4x   - Chocó (departamento más pequeño)
