@@ -345,15 +345,65 @@ def generar_serie_educacion(years, dept_id, tipo="admitidos"):
 # FUNCIÓN PRINCIPAL DE GENERACIÓN
 # ============================================================================
 
+def generar_variacion_mensual(valor_anual, mes, tipo_variable="default"):
+    """
+    Genera variación mensual realista para un valor anual.
+    
+    Diferentes patrones estacionales según el tipo:
+    - IPC: variación estacional (algunos meses más altos)
+    - Educación (admitidos/matriculados): picos en semestres
+    - Empleo: ciclo anual con picos en trimestres
+    - PIB: variación suave
+    
+    Args:
+        valor_anual: valor base para el año
+        mes: número de mes (1-12)
+        tipo_variable: tipo de patrón estacional a aplicar
+        
+    Returns:
+        valor ajustado por estacionalidad
+    """
+    if tipo_variable == "ipc":
+        # IPC: variación pequeña (mayor estabilidad)
+        patrones = [0.95, 0.98, 0.97, 0.99, 1.02, 1.05, 1.08, 1.06, 1.03, 1.01, 1.02, 0.99]
+        factor = patrones[mes - 1]
+    
+    elif tipo_variable == "educacion":
+        # Educación: picos en semestres (enero, julio)
+        patrones = [1.15, 0.95, 0.90, 0.88, 0.87, 0.89, 1.20, 0.92, 0.85, 0.83, 0.85, 0.90]
+        factor = patrones[mes - 1]
+    
+    elif tipo_variable == "empleo":
+        # Empleo: variación cíclica trimestral
+        patrones = [0.98, 0.96, 0.95, 0.97, 0.99, 1.01, 1.03, 1.02, 1.00, 0.99, 0.98, 0.97]
+        factor = patrones[mes - 1]
+    
+    else:  # default (PIB, deserción, etc.)
+        # Variación suave
+        patrones = [0.99, 0.98, 0.99, 1.00, 1.01, 1.02, 1.02, 1.01, 1.00, 0.99, 0.98, 0.99]
+        factor = patrones[mes - 1]
+    
+    # Agregar ruido aleatorio pequeño
+    ruido = np.random.normal(1.0, 0.02)
+    
+    return valor_anual * factor * ruido
+
+
 def generar_dataset_completo():
     """
-    Genera dataset completo de 1980 a 2024 para todos los departamentos.
+    Genera dataset completo MENSUAL de 1980 a 2024 para todos los departamentos.
+    
+    Estructura:
+    - 33 departamentos × 47 años × 12 meses = 18,612 registros
+    - Cada mes contiene variación estacional realista
+    - Variables se distribuyen de forma inteligente según su tipo
     
     Returns:
-        DataFrame con todas las variables simuladas
+        DataFrame con todas las variables simuladas a granularidad mensual
     """
     print("\n" + "="*80)
-    print("GENERADOR DE DATASET SIMULADO - VARIABLES SOCIOECONÓMICAS COLOMBIA (1980-2024)")
+    print("GENERADOR DE DATASET SIMULADO - VARIABLES SOCIOECONÓMICAS COLOMBIA (1980-2026)")
+    print("GRANULARIDAD: MENSUAL (12 registros por departamento/año)")
     print("="*80)
     
     registros = []
@@ -368,7 +418,7 @@ def generar_dataset_completo():
     print("   ✓ Series macroeconómicas generadas")
     
     # Iterar por cada departamento
-    print("\n📍 Generando datos por departamento...")
+    print("\n📍 Generando datos MENSUALES por departamento...")
     for dept_id, dept_nombre in DEPARTAMENTOS.items():
         print(f"   Procesando: {dept_nombre:45s} (Código: {dept_id})", end="\r")
         
@@ -378,86 +428,99 @@ def generar_dataset_completo():
         serie_matriculados = generar_serie_educacion(YEARS, dept_id, "matriculados")
         serie_desercion = generar_serie_educacion(YEARS, dept_id, "desercion")
         
-        # Crear registros
+        # Crear registros MENSUALES
         for idx, year in enumerate(YEARS):
-            # Calcular variables derivadas
-            ratio = serie_matriculados[idx] / serie_admitidos[idx] if serie_admitidos[idx] > 0 else 0
-            
-            # Variación porcentual
-            var_matriculados = np.nan
-            if idx > 0 and serie_matriculados[idx-1] > 0:
-                var_matriculados = (serie_matriculados[idx] - serie_matriculados[idx-1]) / serie_matriculados[idx-1] * 100
-            
-            var_pib = np.nan
-            if idx > 0 and serie_pib[idx-1] > 0:
-                var_pib = (serie_pib[idx] - serie_pib[idx-1]) / serie_pib[idx-1] * 100
-            
-            # Proxy: PIB por matriculado
-            proxy_pib_per_student = serie_pib[idx] / serie_matriculados[idx] if serie_matriculados[idx] > 0 else 0
-            
-            # Estadísticas IPC (media, mediana, std)
-            ipc_media = serie_ipc[idx]
-            ipc_mediana = serie_ipc[idx] * np.random.uniform(0.8, 1.2)  # mediana varía
-            ipc_std = serie_ipc[idx] * np.random.uniform(0.5, 0.8)  # desviación estándar
-            
-            # Crear registro
-            registro = {
-                "codigo_departamento": dept_id,
-                "departamento": dept_nombre,
-                "anio": year,
-                "pib_total_miles_millones_cop": serie_pib[idx],
-                "pib_variacion_pct_anual_vs_anio_previo": var_pib,
-                "total_admitidos": serie_admitidos[idx],
-                "total_matriculados": serie_matriculados[idx],
-                "ratio_matriculados_sobre_admitidos": ratio,
-                "var_pct_matriculados_vs_anio_previo": var_matriculados,
-                "ipc_nacional_total_var_mensual_media": ipc_media,
-                "ipc_nacional_total_var_mensual_mediana": ipc_mediana,
-                "ipc_nacional_total_var_mensual_std": ipc_std,
-                # IPC por categorías (varían menos que IPC general)
-                "ipc_nacional_educacion_var_mensual_media": ipc_media * np.random.uniform(0.9, 1.1),
-                "ipc_nacional_educacion_var_mensual_mediana": ipc_mediana * np.random.uniform(0.8, 1.2),
-                "ipc_nacional_educacion_var_mensual_std": ipc_std * np.random.uniform(0.7, 1.3),
-                "ipc_nacional_alimentos_var_mensual_media": ipc_media * np.random.uniform(0.8, 1.2),
-                "ipc_nacional_alimentos_var_mensual_mediana": ipc_mediana * np.random.uniform(0.7, 1.3),
-                "ipc_nacional_alimentos_var_mensual_std": ipc_std * np.random.uniform(0.6, 1.4),
-                "ipc_nacional_transporte_var_mensual_media": ipc_media * np.random.uniform(0.7, 1.3),
-                "ipc_nacional_transporte_var_mensual_mediana": ipc_mediana * np.random.uniform(0.6, 1.4),
-                "ipc_nacional_transporte_var_mensual_std": ipc_std * np.random.uniform(0.5, 1.5),
-                "ipc_capital_total_var_mensual_media": ipc_media * np.random.uniform(0.95, 1.05),
-                "ipc_capital_educacion_var_mensual_media": ipc_media * np.random.uniform(0.9, 1.1),
-                # Empleo (igual para todos los departamentos)
-                "geih_td_nacional_media_anual": serie_td[idx],
-                "geih_to_nacional_media_anual": serie_to[idx],
-                "geih_tgp_nacional_media_anual": serie_tgp[idx],
-                # Proxy
-                "proxy_pib_miles_mm_cop_por_matriculado": proxy_pib_per_student,
-                # SPADIES (tasas de deserción por nivel)
-                "spadies_td_anual_universitario": serie_desercion[idx] * np.random.uniform(0.8, 1.2),
-                "spadies_td_anual_tyt": serie_desercion[idx] * np.random.uniform(1.0, 1.5),
-                "spadies_td_anual_tecnico_profesional": serie_desercion[idx] * np.random.uniform(0.9, 1.3),
-                "spadies_td_anual_tecnologico": serie_desercion[idx] * np.random.uniform(0.85, 1.25),
-                # Target: tasa de deserción SNIES
-                "outcome_tasa_desercion_snies": serie_desercion[idx],
-                # Flag de datos
-                "outcome_merge_pendiente": 1 if year <= 2022 else 0,  # 2023+ completo
-            }
-            
-            registros.append(registro)
+            for mes in range(1, 13):  # 12 meses
+                # Aplicar variación mensual según tipo de variable
+                pib_mes = generar_variacion_mensual(serie_pib[idx], mes, "default")
+                admitidos_mes = generar_variacion_mensual(serie_admitidos[idx], mes, "educacion")
+                matriculados_mes = generar_variacion_mensual(serie_matriculados[idx], mes, "educacion")
+                ipc_mes = generar_variacion_mensual(serie_ipc[idx], mes, "ipc")
+                td_mes = generar_variacion_mensual(serie_td[idx], mes, "empleo")
+                to_mes = generar_variacion_mensual(serie_to[idx], mes, "empleo")
+                tgp_mes = generar_variacion_mensual(serie_tgp[idx], mes, "empleo")
+                desercion_mes = generar_variacion_mensual(serie_desercion[idx], mes, "default")
+                
+                # Calcular variables derivadas
+                ratio = matriculados_mes / admitidos_mes if admitidos_mes > 0 else 0
+                
+                # Variación porcentual anual (misma para todos los meses del año)
+                var_matriculados = np.nan
+                if idx > 0 and serie_matriculados[idx-1] > 0:
+                    var_matriculados = (serie_matriculados[idx] - serie_matriculados[idx-1]) / serie_matriculados[idx-1] * 100
+                
+                var_pib = np.nan
+                if idx > 0 and serie_pib[idx-1] > 0:
+                    var_pib = (serie_pib[idx] - serie_pib[idx-1]) / serie_pib[idx-1] * 100
+                
+                # Proxy: PIB por matriculado
+                proxy_pib_per_student = pib_mes / matriculados_mes if matriculados_mes > 0 else 0
+                
+                # IPC: variaciones mensuales y derivadas
+                ipc_mediana = ipc_mes * np.random.uniform(0.8, 1.2)
+                ipc_std = ipc_mes * np.random.uniform(0.5, 0.8)
+                
+                # Crear registro MENSUAL
+                registro = {
+                    "codigo_departamento": dept_id,
+                    "departamento": dept_nombre,
+                    "anio": year,
+                    "mes": mes,
+                    "pib_total_miles_millones_cop": pib_mes,
+                    "pib_variacion_pct_anual_vs_anio_previo": var_pib,
+                    "total_admitidos": admitidos_mes,
+                    "total_matriculados": matriculados_mes,
+                    "ratio_matriculados_sobre_admitidos": ratio,
+                    "var_pct_matriculados_vs_anio_previo": var_matriculados,
+                    "ipc_nacional_total_var_mensual_media": ipc_mes,
+                    "ipc_nacional_total_var_mensual_mediana": ipc_mediana,
+                    "ipc_nacional_total_var_mensual_std": ipc_std,
+                    # IPC por categorías
+                    "ipc_nacional_educacion_var_mensual_media": ipc_mes * np.random.uniform(0.9, 1.1),
+                    "ipc_nacional_educacion_var_mensual_mediana": ipc_mediana * np.random.uniform(0.8, 1.2),
+                    "ipc_nacional_educacion_var_mensual_std": ipc_std * np.random.uniform(0.7, 1.3),
+                    "ipc_nacional_alimentos_var_mensual_media": ipc_mes * np.random.uniform(0.8, 1.2),
+                    "ipc_nacional_alimentos_var_mensual_mediana": ipc_mediana * np.random.uniform(0.7, 1.3),
+                    "ipc_nacional_alimentos_var_mensual_std": ipc_std * np.random.uniform(0.6, 1.4),
+                    "ipc_nacional_transporte_var_mensual_media": ipc_mes * np.random.uniform(0.7, 1.3),
+                    "ipc_nacional_transporte_var_mensual_mediana": ipc_mediana * np.random.uniform(0.6, 1.4),
+                    "ipc_nacional_transporte_var_mensual_std": ipc_std * np.random.uniform(0.5, 1.5),
+                    "ipc_capital_total_var_mensual_media": ipc_mes * np.random.uniform(0.95, 1.05),
+                    "ipc_capital_educacion_var_mensual_media": ipc_mes * np.random.uniform(0.9, 1.1),
+                    # Empleo (variación mensual)
+                    "geih_td_nacional_media_anual": td_mes,
+                    "geih_to_nacional_media_anual": to_mes,
+                    "geih_tgp_nacional_media_anual": tgp_mes,
+                    # Proxy
+                    "proxy_pib_miles_mm_cop_por_matriculado": proxy_pib_per_student,
+                    # SPADIES (tasas de deserción por nivel)
+                    "spadies_td_anual_universitario": desercion_mes * np.random.uniform(0.8, 1.2),
+                    "spadies_td_anual_tyt": desercion_mes * np.random.uniform(1.0, 1.5),
+                    "spadies_td_anual_tecnico_profesional": desercion_mes * np.random.uniform(0.9, 1.3),
+                    "spadies_td_anual_tecnologico": desercion_mes * np.random.uniform(0.85, 1.25),
+                    # Target: tasa de deserción SNIES
+                    "outcome_tasa_desercion_snies": desercion_mes,
+                    # Flag de datos
+                    "outcome_merge_pendiente": 1 if year <= 2022 else 0,
+                }
+                
+                registros.append(registro)
     
-    print(f"\n   ✓ {len(DEPARTAMENTOS)} departamentos procesados")
+    print(f"\n   ✓ {len(DEPARTAMENTOS)} departamentos procesados (mensualmente)")
     
     # Crear DataFrame
     df = pd.DataFrame(registros)
     
     # Ordenar
-    df = df.sort_values(["codigo_departamento", "anio"]).reset_index(drop=True)
+    df = df.sort_values(["codigo_departamento", "anio", "mes"]).reset_index(drop=True)
     
-    print(f"\n📈 Dataset generado:")
+    print(f"\n📈 Dataset generado (MENSUAL):")
     print(f"   • Total de registros: {len(df):,}")
-    print(f"   • Período: {df['anio'].min()} - {df['anio'].max()}")
+    print(f"   • Período: {df['anio'].min()}-{df['anio'].max()} ({df['anio'].max() - df['anio'].min() + 1} años)")
+    print(f"   • Meses: {df['mes'].min()}-{df['mes'].max()}")
     print(f"   • Departamentos: {df['codigo_departamento'].nunique()}")
-    print(f"   • Años por departamento: {df.groupby('codigo_departamento').size().iloc[0]}")
+    print(f"   • Registros por departamento: {len(df) // df['codigo_departamento'].nunique()}")
+    print(f"   • Registros mensuales por año: {df[df['anio'] == df['anio'].min()].shape[0] // df['codigo_departamento'].nunique()}")
     
     return df
 
@@ -475,7 +538,8 @@ def generar_reporte_simulacion(df):
     """
     reporte = []
     reporte.append("="*80)
-    reporte.append("REPORTE DE SIMULACIÓN - DATASET SOCIOECONÓMICO COLOMBIA (1980-2024)")
+    reporte.append("REPORTE DE SIMULACIÓN - DATASET SOCIOECONÓMICO COLOMBIA (1980-2026)")
+    reporte.append("GRANULARIDAD: MENSUAL - 12 registros por departamento/año")
     reporte.append("="*80)
     reporte.append(f"\nGenerado: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     
@@ -483,8 +547,10 @@ def generar_reporte_simulacion(df):
     reporte.append("1. DIMENSIONES DEL DATASET")
     reporte.append("="*80)
     reporte.append(f"Registros totales: {len(df):,}")
+    reporte.append(f"Fórmula: {df['codigo_departamento'].nunique()} departamentos × {df['anio'].max() - df['anio'].min() + 1} años × 12 meses = {len(df):,}")
     reporte.append(f"Columnas: {df.shape[1]}")
     reporte.append(f"Período: {df['anio'].min()}-{df['anio'].max()} ({df['anio'].max() - df['anio'].min() + 1} años)")
+    reporte.append(f"Meses: {df['mes'].min()}-{df['mes'].max()}")
     reporte.append(f"Departamentos: {df['codigo_departamento'].nunique()}")
     
     reporte.append("\n" + "="*80)

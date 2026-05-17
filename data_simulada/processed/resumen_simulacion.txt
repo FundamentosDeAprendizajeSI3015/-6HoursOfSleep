@@ -1,15 +1,18 @@
 ================================================================================
-REPORTE DE SIMULACIÓN - DATASET SOCIOECONÓMICO COLOMBIA (1980-2024)
+REPORTE DE SIMULACIÓN - DATASET SOCIOECONÓMICO COLOMBIA (1980-2026)
+GRANULARIDAD: MENSUAL - 12 registros por departamento/año
 ================================================================================
 
-Generado: 2026-05-17 17:59:00
+Generado: 2026-05-17 18:18:51
 
 ================================================================================
 1. DIMENSIONES DEL DATASET
 ================================================================================
-Registros totales: 1,551
-Columnas: 33
+Registros totales: 18,612
+Fórmula: 33 departamentos × 47 años × 12 meses = 18,612
+Columnas: 34
 Período: 1980-2026 (47 años)
+Meses: 1-12
 Departamentos: 33
 
 ================================================================================
@@ -17,40 +20,40 @@ Departamentos: 33
 ================================================================================
 
 pib_total_miles_millones_cop:
-  Media: 189487.76
-  Std:   171734.43
-  Min:   22235.87
-  Max:   1549064.46
+  Media: 189243.61
+  Std:   172253.02
+  Min:   21858.45
+  Max:   1636193.26
 
 total_matriculados:
-  Media: 34133.19
-  Std:   37260.67
-  Min:   8199.40
-  Max:   343972.77
+  Media: 31755.78
+  Std:   35141.63
+  Min:   6087.97
+  Max:   418983.12
 
 outcome_tasa_desercion_snies:
-  Media: 10.18
-  Std:   2.01
-  Min:   4.10
-  Max:   17.87
+  Media: 10.25
+  Std:   2.06
+  Min:   3.73
+  Max:   17.96
 
 ipc_nacional_total_var_mensual_media:
-  Media: 1.25
-  Std:   0.95
-  Min:   0.21
-  Max:   3.50
+  Media: 1.26
+  Std:   0.97
+  Min:   0.19
+  Max:   3.95
 
 geih_td_nacional_media_anual:
-  Media: 13.35
-  Std:   1.94
-  Min:   10.48
-  Max:   17.93
+  Media: 13.19
+  Std:   1.96
+  Min:   9.60
+  Max:   19.42
 
 ================================================================================
 3. DATOS FALTANTES
 ================================================================================
-pib_variacion_pct_anual_vs_anio_previo            :     33 ( 2.13%)
-var_pct_matriculados_vs_anio_previo               :     33 ( 2.13%)
+pib_variacion_pct_anual_vs_anio_previo            :    396 ( 2.13%)
+var_pct_matriculados_vs_anio_previo               :    396 ( 2.13%)
 
 ================================================================================
 4. DISTRIBUCIONES UTILIZADAS POR VARIABLE
