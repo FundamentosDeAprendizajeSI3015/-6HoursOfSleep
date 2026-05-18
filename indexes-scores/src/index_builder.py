@@ -29,9 +29,9 @@ from sklearn.preprocessing import StandardScaler
 # ── Rutas ─────────────────────────────────────────────────────────────────────
 
 BASE_DIR = Path(__file__).parent.parent.parent
-DATA_PROCESSED = BASE_DIR / "data" / "processed"
-DATA_FINAL = BASE_DIR / "data" / "final"
-REPORTS_DIR = BASE_DIR / "reports" 
+DATA_PROCESSED = BASE_DIR / "data_simulada" / "processed"
+DATA_FINAL = BASE_DIR / "data_simulada" / "final"
+REPORTS_DIR = Path(__file__).parent.parent / "reports" / "dataset_simulado"
 
 # Crear carpeta final si no existe
 DATA_FINAL.mkdir(parents=True, exist_ok=True)
@@ -821,7 +821,7 @@ def pipeline_completo():
     
     # 1. CARGA Y LIMPIEZA
     print("\n📥 Cargando dataset...")
-    df_path = DATA_PROCESSED / "panel_desercion_socioeconomico_completo 1.csv"
+    df_path = DATA_PROCESSED / "data_simulado_1980_2026.csv"
     df = pd.read_csv(df_path)
     n_filas_original = df.shape[0]
     print(f"   Dataset original: {n_filas_original} filas × {df.shape[1]} columnas")
