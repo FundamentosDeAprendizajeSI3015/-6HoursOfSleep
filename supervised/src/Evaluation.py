@@ -29,6 +29,10 @@ warnings.filterwarnings("ignore")
 
 FIGURES_DIR = Path("./reports/eda_figures")
 REPORTS_DIR = Path("./reports")
+
+# Crear directorios si no existen
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -289,48 +293,6 @@ def plot_comparacion_metricas(df_metricas: pd.DataFrame,
     
     if guardar:
         path = FIGURES_DIR / "supervisado_comparacion_metricas.png"
-        plt.savefig(path, dpi=150, bbox_inches="tight")
-        print(f"[OK] Guardado: {path}")
-    plt.show()
-
-
-def plot_comparacion_departamentos(df_resultados: pd.DataFrame,
-                                  nombre_modelo: str = "Modelo",
-                                  guardar: bool = True):
-    """
-    Gráfico de barras horizontal comparando Valor Real vs Predicho por Departamento.
-    
-    Args:
-        df_resultados: DataFrame con columnas ['departamento', 'desercion_real_%', 'prediccion_%']
-        nombre_modelo: Nombre del modelo para el título
-        guardar: Si se guarda imagen
-    """
-    # Ordenar por valor real para mejor visualización
-    df_plot = df_resultados.sort_values("desercion_real_%", ascending=True)
-    
-    fig, ax = plt.subplots(figsize=(10, 12))
-    
-    y = np.arange(len(df_plot))
-    height = 0.35
-    
-    ax.barh(y + height/2, df_plot["desercion_real_%"], height, label='Real (%)', color='steelblue', alpha=0.8)
-    ax.barh(y - height/2, df_plot["prediccion_%"], height, label='Predicho (%)', color='orange', alpha=0.8)
-    
-    ax.set_ylabel('Departamento', fontsize=12)
-    ax.set_xlabel('Tasa de Deserción (%)', fontsize=12)
-    ax.set_title(f'Comparación por Departamento: Real vs. Predicho\nModelo: {nombre_modelo}', 
-                 fontsize=14, fontweight='bold')
-    ax.set_yticks(y)
-    ax.set_yticklabels(df_plot['departamento'])
-    ax.legend()
-    
-    # Añadir grid y etiquetas de valor
-    ax.grid(True, alpha=0.3, axis='x')
-    
-    plt.tight_layout()
-    
-    if guardar:
-        path = FIGURES_DIR / f"supervisado_comparacion_departamentos.png"
         plt.savefig(path, dpi=150, bbox_inches="tight")
         print(f"[OK] Guardado: {path}")
     plt.show()
