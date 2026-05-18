@@ -1,6 +1,6 @@
 # QUICK REFERENCE - PIPELINE SUPERVISADO
 
-## Ejecución Rápida
+## Ejecucion Rapida
 
 ```bash
 # Opcion 1: Script completo
@@ -50,7 +50,7 @@ MODELO GANADOR: GradientBoosting
 Test Set:
   RMSE: 0.0517  (Error cuadratico medio)
   MAE:  0.0293  (Error absoluto medio)
-  R²:   0.4123  (Varianza explicada)
+  R2:   0.4123  (Varianza explicada)
   MAPE: 20.41%  (Error porcentual)
 
 vs Baseline OLS:
@@ -66,6 +66,7 @@ vs Baseline OLS:
 | supervisado_predicho_vs_real.png | PNG | reports/eda_figures/ |
 | supervisado_residuales.png | PNG | reports/eda_figures/ |
 | supervisado_comparacion_metricas.png | PNG | reports/eda_figures/ |
+| supervisado_comparacion_departamentos.png | PNG | reports/eda_figures/ |
 | supervisado_importancia_randomforest.png | PNG | reports/eda_figures/ |
 | supervisado_importancia_gradientboosting.png | PNG | reports/eda_figures/ |
 
@@ -90,27 +91,27 @@ Scaler: StandardScaler (todos los modelos)
 
 ## Workflow Completo
 
-1. **Load** → data_loader.py
+1. LOAD -> data_loader.py
    - Carga datos
    - Limpia nulos
    - Selecciona features
 
-2. **Prepare** → Models.py
+2. PREPARE -> Models.py
    - Split train/test 80/20
    - Imputa nulos con media
    - Estandariza features
 
-3. **Train** → Models.py
+3. TRAIN -> Models.py
    - CV 5-fold para cada modelo
    - Entrena en set completo
    - Calcula metricas CV
 
-4. **Evaluate** → Evaluation.py
+4. EVALUATE -> Evaluation.py
    - Predice en test set
    - Calcula metricas test
    - Genera visualizaciones
 
-5. **Export** → utils.py
+5. EXPORT -> utils.py
    - Tabla CSV
    - Reporte TXT
    - Graficos PNG
@@ -127,20 +128,19 @@ TARGET_COL = "outcome_tasa_desercion_snies"
 
 ## Cambios Recientes
 
-- [✓] Emojis removidos de codigo fuente
-- [✓] Comentarios explicativos agregados a Models.py
-- [✓] Joblib parallel deshabilitado en Windows
-- [✓] Indentacion corregida
-- [✓] Pipeline ejecutado exitosamente
-- [✓] Todas las salidas generadas
+- [X] Emojis removidos de todos los documentos y reportes
+- [X] Comentarios explicativos agregados a Models.py
+- [X] Analisis comparativo por departamentos implementado
+- [X] Pipeline ejecutado exitosamente
+- [X] Todas las salidas generadas
 
-## Para Más Información
+## Para Mas Informacion
 
-- `README.md` - Documentacion completa
-- `RESUMEN_FINAL.md` - Estado del proyecto
-- `CONCLUSIONES.md` - Analisis detallado
-- `01_pipeline_completo.ipynb` - Notebook interactivo
+- README.md - Documentacion completa
+- INDEX.md - Indice de archivos
+- CONCLUSIONES.md - Analisis detallado
+- 01_pipeline_completo.ipynb - Notebook interactivo
 
 ---
 
-*Ultima actualizacion: Mayo 5, 2026*
+Ultima actualizacion: Mayo 11, 2026

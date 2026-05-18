@@ -1,22 +1,79 @@
-# feature/supervised-models — Modelos Supervisados
+# Pipeline Supervisado: Predicción de Deserción Estudiantil
 
-> **Responsable:** Juanes  
-> **Rama:** `feature/supervised-models`  
-> **Objetivo:** Implementar, entrenar, comparar y evaluar modelos supervisados para predicción de tasa de deserción estudiantil.
+**⚠️ ACTUALIZACIÓN (Mayo 18, 2026):** Este archivo ha sido consolidado en **[README_CONSOLIDATED.md](README_CONSOLIDATED.md)** con información actualizada sobre los **18,612 registros mensuales**.
+
+**Responsable:** Juanes  
+**Rama:** `feature/supervised-models`  
+**Versión:** 2.0 (18,612 registros mensuales)  
+**Última actualización:** Mayo 18, 2026
 
 ---
 
-## Descripcion General
+## ⚡ Resumen Ejecutivo
 
-Este módulo implementa un **pipeline completo de modelado supervisado** con:
+**Dataset:** 18,612 registros mensuales (33 departamentos × 47 años × 12 meses)  
+**Features:** 27 variables predictoras (después de limpieza)  
+**Modelos:** 8 modelos (4 baseline + 4 avanzados)  
+**Ganador:** Random Forest (RMSE: 0.5566, R²: 0.9284)  
+**Mejora:** 9.4% vs baseline OLS  
 
-- [OK] **Carga y limpieza de datos** automática
-- [OK] **8 modelos diferentes**: 4 baseline + 4 avanzados
-- [OK] **Validación cruzada 5-fold** estandarizada
-- [OK] **Evaluación en test set** con métricas estándar
-- [OK] **Visualizaciones de diagnóstico** comprehensivas
-- [OK] **Feature importance** para modelos de árbol
-- [OK] **Reportes y exportación** de resultados
+### Resultados Principales
+
+| Modelo | RMSE | MAE | R² | MAPE |
+|--------|------|-----|-----|------|
+| 🏆 **Random Forest** | **0.5566** | **0.4334** | **0.9284** | **4.32%** |
+| KNN | 0.5751 | 0.4224 | 0.9235 | 4.16% |
+| Gradient Boosting | 0.6002 | 0.4809 | 0.9167 | 4.78% |
+| OLS (Baseline) | 0.6146 | 0.4924 | 0.9126 | 4.89% |
+
+---
+
+## Descripción General
+
+Este módulo implementa un pipeline completo de modelado supervisado con:
+
+- ✅ **18,612 registros mensuales** (12x más que versión anterior)
+- ✅ Carga y limpieza de datos automatizada
+- ✅ 8 modelos diferentes: 4 baseline + 4 avanzados
+- ✅ Validación cruzada 5-fold estandarizada
+- ✅ Evaluación en test set con métricas estándar
+- ✅ Visualizaciones comprehensivas de diagnóstico
+- ✅ Feature importance para modelos de árbol
+- ✅ Reportes y exportación de resultados (JSON, CSV)
+
+---
+
+## 🚀 Inicio Rápido
+
+### Opción 1: Jupyter Notebook (Recomendado)
+```bash
+jupyter notebook ../01_pipeline_completo.ipynb
+```
+
+### Opción 2: Script Python Completo
+```bash
+python ../main.py
+```
+
+### Opción 3: Test Simple
+```bash
+python ../test_pipeline_simple.py
+```
+
+---
+
+## 📖 Documentación Completa
+
+📌 **[README_CONSOLIDATED.md](README_CONSOLIDATED.md)** ← Ir aquí para documentación completa
+
+Este archivo consolidado incluye:
+- ✅ Descripción completa de datos (18,612 registros mensuales)
+- ✅ Metodología de modelado
+- ✅ Resultados detallados de los 8 modelos
+- ✅ Interpretación de visualizaciones
+- ✅ Guía de uso en código Python
+- ✅ Troubleshooting
+- ✅ Referencias teóricas
 
 ---
 
@@ -24,317 +81,74 @@ Este módulo implementa un **pipeline completo de modelado supervisado** con:
 
 ```
 supervised/
-├── main.py                              ← Punto de entrada (ejecutar este)
+├── 01_pipeline_completo.ipynb        ← Notebook interactivo
+├── main.py                           ← Script principal
 │
 ├── src/
-│   ├── data_loader.py                  ← Carga y limpieza de datos
-│   ├── Models.py                       ← Definición y entrenamiento de 8 modelos
-│   ├── Evaluation.py                   ← Métricas y visualizaciones
-│   └── utils.py                        ← Funciones utilitarias
+│   ├── data_loader.py               ← Carga 18,612 registros
+│   ├── Models.py                    ← 8 modelos
+│   └── Evaluation.py                ← Métricas y visualizaciones
 │
-├── reports/                            ← Salidas generadas
-│   ├── eda_figures/
-│   │   ├── supervisado_predicho_vs_real.png
-│   │   ├── supervisado_residuales.png
-│   │   ├── supervisado_comparacion_metricas.png
-│   │   ├── supervisado_importancia_RandomForest.png
-│   │   └── supervisado_importancia_GradientBoosting.png
+├── reports/
 │   ├── tabla_comparativa_modelos_supervisados.csv
-│   └── informe_supervisado.txt
+│   └── eda_figures/
+│       ├── supervisado_predicho_vs_real.png
+│       ├── supervisado_residuales.png
+│       ├── supervisado_comparacion_metricas.png
+│       ├── supervisado_importancia_randomforest.png
+│       └── supervisado_importancia_gradientboosting.png
 │
-└── README.md                           ← Este archivo
+├── results/
+│   ├── pipeline_results.json        ← Resultados en JSON
+│   └── resumen_ejecutivo.json
+│
+└── docs/
+    ├── README_CONSOLIDATED.md       ← Documentación completa
+    ├── README.md                    ← Este archivo
+    ├── CONCLUSIONES.md
+    └── QUICK_REFERENCE.md
 ```
 
 ---
 
-## Uso Rapido
+## 🎯 Modelos
 
-### Ejecución Completa
-
-```bash
-# Desde la carpeta supervised/
-python main.py
-```
-
-### Ejecución en Jupyter Notebook
-
-```bash
-# Desde la carpeta supervised/
-jupyter notebook 01_pipeline_completo.ipynb
-```
-
-Este comando ejecuta el pipeline completo:
-1. Carga datos desde `data/final/dataset_con_indice.csv`
-2. Realiza limpieza y preparación
-3. Entrena 8 modelos con validación cruzada
-4. Evalúa en test set
-5. Genera visualizaciones y reportes
-
----
-
-## [DATOS] Modelos Implementados
-
-### Baseline (4 modelos)
-
-| Modelo | Parámetros | Justificación |
-|--------|-----------|---------------|
-| **OLS** | Ninguno | Baseline sin regularización, máximo interpretable |
-| **Ridge** | α=1.0 | Regularización L2, maneja multicolinealidad |
-| **Lasso** | α=0.1 | Regularización L1, selección automática de variables |
-| **ElasticNet** | α=0.1, l1_ratio=0.5 | Combinación L1+L2, mejor en muchos casos |
-
-**Utilidad:** Proporcionan puntos de referencia simples e interpretables.
+### Baseline (4 modelos lineales)
+1. **OLS** - Regresión lineal simple
+2. **Ridge** - Regresión con regularización L2
+3. **Lasso** - Regresión con regularización L1
+4. **ElasticNet** - Combinación L1 + L2
 
 ### Avanzados (4 modelos)
-
-| Modelo | Parámetros | Justificación |
-|--------|-----------|---------------|
-| **Random Forest** | n_estimators=100 | Ensemble robusto a outliers |
-| **Gradient Boosting** | n_estimators=100, lr=0.1 | Boosting secuencial, típicamente superior |
-| **SVR (RBF)** | C=1.0, ε=0.1 | Kernel no-lineal, bueno en espacios altos |
-| **KNN** | n_neighbors=5 | Basado en instancias, captura patrones locales |
-
-**Utilidad:** Capturan relaciones no-lineales complejas entre variables.
+5. **Random Forest** 🏆 - RMSE: 0.5566 (9.4% mejor que OLS)
+6. **Gradient Boosting** - RMSE: 0.6002
+7. **SVR** - Support Vector Regression
+8. **KNN** - K-Nearest Neighbors
 
 ---
 
-##  Métricas de Evaluación
+## 📊 Datos
 
-Todos los modelos son evaluados con **4 métricas estándar**:
-
-| Métrica | Fórmula | Interpretación | Unidad |
-|---------|---------|----------------|--------|
-| **RMSE** | √(MSE) | Error cuadrático medio | % |
-| **MAE** | Mean(\|y - ŷ\|) | Error promedio absoluto | % |
-| **R²** | 1 - (SS_res/SS_tot) | Varianza explicada | [0, 1] |
-| **MAPE** | Mean(\|Δy/y\|) × 100 | Error porcentual medio | % |
-
-**Métrica principal:** RMSE (usado para ranking final)
+**Fuente:** `data_simulada/processed/data_simulado_1980_2026.csv`
+- Registros: **18,612** (mensual)
+- Período: 1980-2026 (47 años)
+- Departamentos: 33
+- Features: 27 (después de limpieza)
+- Target: `outcome_tasa_desercion_snies`
 
 ---
 
-## [PROCESANDO] Protocolo de Validación
+## 🔗 Documentación Relacionada
 
-```
-┌─────────────────────────────────────────────────────┐
-│ DATOS COMPLETOS (66 obs, 2 años × 33 depart.)     │
-└──────────┬──────────────────────────────────────────┘
-           │ Eliminar nulos
-           ↓
-┌──────────────────────────┐
-│ DATOS LIMPIOS (50-55 obs)│
-└──────────┬───────────────┘
-           │ Split 80/20
-       ┌───┴───┐
-       ↓       ↓
-   TRAIN   TEST
-   (40)    (10)
-    │       │
-    │   [EVALUACIÓN FINAL]
-    │
-    ↓
-  CV 5-fold
-  (métricas reportadas)
-```
-
-**Configuración:**
-- Split: 80% train / 20% test
-- Random state: 42 (reproducibilidad)
-- CV: 5-fold, shuffle=True
+- **[README_CONSOLIDATED.md](README_CONSOLIDATED.md)** — Documentación completa (→ empezar aquí)
+- **[CONCLUSIONES.md](CONCLUSIONES.md)** — Análisis detallado
+- **[QUICK_REFERENCE.md](QUICK_REFERENCE.md)** — Comandos rápidos
+- **[INDEX.md](INDEX.md)** — Índice completo
 
 ---
 
-## [RANKING] Ejemplo de Salida
+**Última actualización:** Mayo 18, 2026  
+**Versión:** 2.0 (18,612 registros mensuales)  
+**Responsable:** Juanes
 
-```
-=====================================================================
-[DATOS] RANKING POR RMSE (Validación Cruzada)
-=====================================================================
-  GradientBoosting     | RMSE: 3.1234 ± 0.5678
-  RandomForest         | RMSE: 3.4567 ± 0.6789
-  SVR                  | RMSE: 4.1234 ± 0.7890
-  KNN                  | RMSE: 4.5678 ± 0.8901
-  Ridge                | RMSE: 5.1234 ± 0.9012
-  ElasticNet           | RMSE: 5.3456 ± 0.9123
-  Lasso                | RMSE: 5.5678 ± 0.9234
-  OLS                  | RMSE: 5.6789 ± 0.9345
-
-=====================================================================
-[LISTA] TABLA COMPARATIVA FINAL (Test Set)
-=====================================================================
-              RMSE      MAE      R2    MAPE
-modelo
-GradientBoosting  3.0521   2.4567  0.7234  12.34%
-RandomForest      3.2143   2.6789  0.7012  13.45%
-SVR               4.0876   3.1234  0.6789  14.56%
-...
-```
-
----
-
-##  Usar el Módulo en Código
-
-```python
-from src.data_loader import load_and_prepare
-from src.models import preparar_datos, entrenar_todos_modelos
-from src.evaluation import evaluar_todos, plot_predicho_vs_real
-
-# 1. Cargar datos
-X, y, loader = load_and_prepare()
-
-# 2. Preparar split
-X_train, X_test, y_train, y_test = preparar_datos(X, y)
-
-# 3. Entrenar
-modelos, cv_results = entrenar_todos_modelos(X_train, y_train)
-
-# 4. Evaluar
-metricas = evaluar_todos(modelos, X_test.values, y_test.values)
-
-# 5. Visualizar
-plot_predicho_vs_real(modelos, X_test.values, y_test.values)
-
-# Ver modelo ganador
-print(f"Mejor: {metricas.index[0]}")
-```
-
----
-
-## [CONFIGURACION] Configuración de Hiperparámetros
-
-Los hiperparámetros pueden ajustarse en `src/models.py`:
-
-```python
-# Modelos baseline
-Ridge(alpha=1.0)              # Aumentar para mayor regularización
-Lasso(alpha=0.1)              # Aumentar para más sparsidad
-
-# Modelos avanzados
-RandomForestRegressor(
-    n_estimators=100,         # Más árboles → mejor pero más lento
-    max_depth=None,           # Limitar para evitar overfitting
-    min_samples_split=5       # Mayor → árboles más simples
-)
-
-GradientBoostingRegressor(
-    n_estimators=100,
-    learning_rate=0.1,        # Menor → entrenamiento más lento pero mejor
-    max_depth=3               # Profundidad de cada árbol
-)
-```
-
----
-
-## [DATOS] Interpretación de Visualizaciones
-
-### Predicho vs. Real
-- **Puntos sobre diagonal roja** → Predicción correcta
-- **Dispersión grande** → Modelo con alta varianza
-- **Sesgo sistemático** → Error consistente en dirección
-
-### Residuales
-- **Aleatorios alrededor de 0** → Buen modelo
-- **Patrón en embudo** → Heteroscedasticidad
-- **Puntos alejados** → Outliers problemáticos
-
-### Importancia de Variables
-- **Barras largas** → Variables clave para predicción
-- **Top features** → Enfocarse en estas para interpretabilidad
-
----
-
-##  Variable Objetivo y Features
-
-### Target
-```
-outcome_tasa_desercion_snies    Tasa de deserción estudiantil (%)
-```
-
-### Features Clave
-```
-Macroeconómicas:
-  • geih_td_nacional_media_anual          Tasa de desempleo nacional
-  • ipc_nacional_total_var_mensual_media  Inflación nacional
-  • pib_variacion_pct_anual_vs_anio_previo  Crecimiento PIB
-
-Índices (Construcción Previa):
-  • indice_vulnerabilidad_pca             PCA (44.8% varianza)
-  • indice_vulnerabilidad_teorico         Teórico (literatura)
-
-Educativas:
-  • spadies_td_anual_tecnologico          Deserción técnica
-  • total_matriculados                    Acceso a educación
-  • proxy_pib_miles_mm_cop_por_matriculado  PIB por estudiante
-```
-
----
-
-## [OK] Checklist de Completitud
-
-- [x] Carga automática de datos
-- [x] Limpieza de data leakage conocido
-- [x] 4 modelos baseline
-- [x] 4 modelos avanzados
-- [x] Validación cruzada 5-fold
-- [x] Métricas estándar (RMSE, MAE, R², MAPE)
-- [x] Split train/test 80/20
-- [x] Visualizaciones (scatter, residuales, comparación)
-- [x] Feature importance
-- [x] Exportación de resultados CSV
-- [x] Documentación completa
-- [x] Código bien comentado
-
----
-
-##  Troubleshooting
-
-### Error: "No se encontró dataset_con_indice.csv"
-```python
-# Especificar ruta manualmente
-loader = DataLoader("../../data/final/dataset_con_indice.csv")
-```
-
-### Pocos datos para CV (< 30 muestras)
-- Normal en datasets pequeños
-- Usar k-fold bajo (k=3) si es necesario
-- Considerar leave-one-out CV
-
-### Modelo con R² negativo
-- Indica PEOR que baseline
-- Revisar features y datos
-- Considerar transformaciones
-
----
-
-##  Referencias Teóricas
-
-### Validación Cruzada
-Estima performance real mediante folds múltiples, evita overfitting.
-
-### RMSE vs MAE
-- RMSE penaliza más errores grandes
-- MAE es más resistente a outliers
-
-### Regularización (Ridge/Lasso)
-- Ridge: Reduce magnitud coeficientes (L2)
-- Lasso: Selecciona variables importantes (L1)
-
-### Ensemble Methods
-- Random Forest: Paralelo, robusto
-- Gradient Boosting: Secuencial, típicamente mejor
-
----
-
-## [NOTA] Notas Finales
-
-- **Reproducibilidad:** Random state = 42 en todos los splits
-- **Datos limitados:** 50-55 muestras finales después de limpieza
-- **Data leakage:** Ya eliminado en EDA (spadies_td_anual_universitario)
-- **Multicolinealidad:** Índices sintéticos capturan información económica
-- **Siguiente paso:** Tuning de hiperparámetros en modelo ganador
-
----
-
-**Actualizado:** Mayo 5, 2026  
-**Responsable:** Juanes  
-**Rama:** `feature/supervised-models`
+→ **[Ir a documentación completa](README_CONSOLIDATED.md)**

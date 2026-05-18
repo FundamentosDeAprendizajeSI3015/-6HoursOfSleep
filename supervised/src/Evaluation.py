@@ -29,6 +29,10 @@ warnings.filterwarnings("ignore")
 
 FIGURES_DIR = Path("./reports/eda_figures")
 REPORTS_DIR = Path("./reports")
+
+# Crear directorios si no existen
+FIGURES_DIR.mkdir(parents=True, exist_ok=True)
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 FIGURES_DIR.mkdir(parents=True, exist_ok=True)
 REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
