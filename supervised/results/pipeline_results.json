@@ -1,0 +1,384 @@
+{
+  "metadata": {
+    "description": "Resultados completos del pipeline supervisado de predicción de deserción estudiantil",
+    "fecha_ejecucion": "2026-05-18",
+    "version": "1.0",
+    "dataset": "data_simulado_1980_2026.csv (mensual)"
+  },
+  
+  "datos_cargados": {
+    "descripcion": "Información sobre la carga de datos mensuales",
+    "ruta_archivo": "c:\\Users\\juane\\OneDrive\\Documentos\\EAFIT\\2026-01\\Aprendizaje Automatico\\PROYECTO FINAL\\-6HoursOfSleep\\data_simulada\\processed\\data_simulado_1980_2026.csv",
+    "registros_totales": 18612,
+    "comentario": "Dataset mensual completo: 33 departamentos × 47 años (1980-2026) × 12 meses",
+    "dimensiones": {
+      "filas_originales": 18612,
+      "columnas_originales": 34,
+      "filas_limpias": 18612,
+      "columnas_limpias": 32
+    },
+    "temporal": {
+      "anos_cobertura": "1980-2026",
+      "total_anos": 47,
+      "meses": "1-12 (datos mensuales)",
+      "granularidad": "mensual"
+    },
+    "geografico": {
+      "departamentos": 33
+    }
+  },
+
+  "limpieza_datos": {
+    "descripcion": "Procesos de limpieza y validación de datos",
+    "columnas_eliminadas": [
+      {
+        "nombre": "spadies_td_anual_universitario",
+        "razon": "data leakage - variable que no debería estar en el modelo predictivo"
+      },
+      {
+        "nombre": "outcome_merge_pendiente",
+        "razon": "columna técnica - no tiene información predictiva"
+      }
+    ],
+    "valores_nulos": {
+      "total_detectados": 792,
+      "estrategia": "Imputación con media (evita eliminar filas y preserva datos mensuales)"
+    },
+    "duplicados": 0,
+    "resultado_final": "18,612 registros limpios y validados"
+  },
+
+  "analisis_exploratorio": {
+    "descripcion": "Análisis básico de características y correlaciones",
+    "dimensiones_features": {
+      "muestras": 18612,
+      "features": 27
+    },
+    "target": {
+      "nombre": "outcome_tasa_desercion_snies",
+      "media": 10.2505,
+      "desviacion_estandar": 2.0645,
+      "comentario": "Tasa de deserción estudiantil a nivel nacional (SNIES)"
+    },
+    "top_5_features_correlacionados": [
+      {
+        "ranking": 1,
+        "nombre": "spadies_td_anual_tecnico_profesional",
+        "correlacion": 0.8839,
+        "interpretacion": "Fuerte correlación positiva con deserción"
+      },
+      {
+        "ranking": 2,
+        "nombre": "spadies_td_anual_tecnologico",
+        "correlacion": 0.8736,
+        "interpretacion": "Muy fuerte correlación con tasa de deserción"
+      },
+      {
+        "ranking": 3,
+        "nombre": "spadies_td_anual_tyt",
+        "correlacion": 0.8635,
+        "interpretacion": "Fuerte correlación con deserción en TyT"
+      },
+      {
+        "ranking": 4,
+        "nombre": "pib_total_miles_millones_cop",
+        "correlacion": 0.4590,
+        "interpretacion": "Correlación moderada con PIB nacional"
+      },
+      {
+        "ranking": 5,
+        "nombre": "ipc_capital_total_var_mensual_media",
+        "correlacion": 0.4241,
+        "interpretacion": "Correlación moderada con variación de IPC en capital"
+      }
+    ]
+  },
+
+  "preparacion_datos": {
+    "descripcion": "Split de datos para entrenamiento y prueba",
+    "estrategia": "Train/Test split 80/20",
+    "train": {
+      "muestras": 14889,
+      "porcentaje": "80%"
+    },
+    "test": {
+      "muestras": 3723,
+      "porcentaje": "20%"
+    },
+    "features": 27,
+    "observacion": "Split estratificado para preservar distribución de datos mensuales"
+  },
+
+  "entrenamiento_modelos": {
+    "descripcion": "Resultados de validación cruzada con 5 folds",
+    "metodo_validacion": "5-Fold Cross Validation",
+    "modelos_evaluados": 8,
+    "resultados_cv": [
+      {
+        "modelo": "OLS (Ordinary Least Squares)",
+        "tipo": "Linear Regression",
+        "rmse": "0.7886 ± 0.0028",
+        "mae": "0.4960 ± 0.0036",
+        "r2": "0.9088 ± 0.0021",
+        "ranking_cv": 5
+      },
+      {
+        "modelo": "Ridge",
+        "tipo": "Linear Regression (L2 Regularization)",
+        "rmse": "0.7886 ± 0.0028",
+        "mae": "0.4960 ± 0.0036",
+        "r2": "0.9088 ± 0.0021",
+        "ranking_cv": 6
+      },
+      {
+        "modelo": "Lasso",
+        "tipo": "Linear Regression (L1 Regularization)",
+        "rmse": "0.7983 ± 0.0023",
+        "mae": "0.5091 ± 0.0024",
+        "r2": "0.9043 ± 0.0024",
+        "ranking_cv": 8
+      },
+      {
+        "modelo": "ElasticNet",
+        "tipo": "Linear Regression (L1+L2 Regularization)",
+        "rmse": "0.7934 ± 0.0028",
+        "mae": "0.5024 ± 0.0033",
+        "r2": "0.9066 ± 0.0022",
+        "ranking_cv": 7
+      },
+      {
+        "modelo": "RandomForest",
+        "tipo": "Ensemble (Tree-based)",
+        "rmse": "0.7552 ± 0.0063",
+        "mae": "0.4392 ± 0.0079",
+        "r2": "0.9233 ± 0.0029",
+        "ranking_cv": 1,
+        "comentario": "Mejor desempeño en validación cruzada"
+      },
+      {
+        "modelo": "GradientBoosting",
+        "tipo": "Ensemble (Boosting)",
+        "rmse": "0.7815 ± 0.0046",
+        "mae": "0.4859 ± 0.0062",
+        "r2": "0.9121 ± 0.0031",
+        "ranking_cv": 3
+      },
+      {
+        "modelo": "SVR (Support Vector Regression)",
+        "tipo": "Kernel-based",
+        "rmse": "0.7856 ± 0.0036",
+        "mae": "0.4874 ± 0.0031",
+        "r2": "0.9102 ± 0.0027",
+        "ranking_cv": 4
+      },
+      {
+        "modelo": "KNN (K-Nearest Neighbors)",
+        "tipo": "Instance-based",
+        "rmse": "0.7730 ± 0.0027",
+        "mae": "0.4405 ± 0.0027",
+        "r2": "0.9159 ± 0.0019",
+        "ranking_cv": 2
+      }
+    ],
+    "ranking_cv_por_rmse": [
+      "1. RandomForest (0.7552 ± 0.0063)",
+      "2. KNN (0.7730 ± 0.0027)",
+      "3. GradientBoosting (0.7815 ± 0.0046)",
+      "4. SVR (0.7856 ± 0.0036)",
+      "5. Ridge (0.7886 ± 0.0028)",
+      "6. OLS (0.7886 ± 0.0028)",
+      "7. ElasticNet (0.7934 ± 0.0028)",
+      "8. Lasso (0.7983 ± 0.0023)"
+    ]
+  },
+
+  "evaluacion_test_set": {
+    "descripcion": "Evaluación final en el conjunto de prueba (20% de datos)",
+    "muestras_test": 3723,
+    "metricas": [
+      {
+        "modelo": "RandomForest",
+        "rmse": 0.5566,
+        "mae": 0.4334,
+        "r2": 0.9284,
+        "mape": "4.32%",
+        "ranking_test": 1,
+        "es_ganador": true,
+        "comentario": "Mejor desempeño en test set - MODELO RECOMENDADO"
+      },
+      {
+        "modelo": "KNN",
+        "rmse": 0.5751,
+        "mae": 0.4224,
+        "r2": 0.9235,
+        "mape": "4.16%",
+        "ranking_test": 2
+      },
+      {
+        "modelo": "GradientBoosting",
+        "rmse": 0.6002,
+        "mae": 0.4809,
+        "r2": 0.9167,
+        "mape": "4.78%",
+        "ranking_test": 3
+      },
+      {
+        "modelo": "SVR",
+        "rmse": 0.6060,
+        "mae": 0.4784,
+        "r2": 0.9151,
+        "mape": "4.75%",
+        "ranking_test": 4
+      },
+      {
+        "modelo": "OLS (Baseline)",
+        "rmse": 0.6146,
+        "mae": 0.4924,
+        "r2": 0.9126,
+        "mape": "4.89%",
+        "ranking_test": 5,
+        "comentario": "Modelo de referencia"
+      },
+      {
+        "modelo": "Ridge",
+        "rmse": 0.6147,
+        "mae": 0.4924,
+        "r2": 0.9126,
+        "mape": "4.89%",
+        "ranking_test": 6
+      },
+      {
+        "modelo": "ElasticNet",
+        "rmse": 0.6220,
+        "mae": 0.4991,
+        "r2": 0.9105,
+        "mape": "5.02%",
+        "ranking_test": 7
+      },
+      {
+        "modelo": "Lasso",
+        "rmse": 0.6308,
+        "mae": 0.5058,
+        "r2": 0.9080,
+        "mape": "5.10%",
+        "ranking_test": 8
+      }
+    ]
+  },
+
+  "modelo_ganador": {
+    "descripcion": "Análisis detallado del modelo ganador",
+    "nombre": "RandomForest",
+    "metricas_test": {
+      "rmse": 0.5566,
+      "mae": 0.4334,
+      "r2": 0.9284,
+      "mape": "4.32%"
+    },
+    "metricas_cv": {
+      "rmse": "0.7552 ± 0.0063",
+      "mae": "0.4392 ± 0.0079",
+      "r2": "0.9233 ± 0.0029"
+    },
+    "ventajas": [
+      "Mejor desempeño en validación cruzada (Ranking 1)",
+      "Mejor desempeño en test set (Ranking 1)",
+      "Maneja relaciones no-lineales con datos mensuales",
+      "Robustez en predicciones con series temporales"
+    ],
+    "mejora_vs_baseline": {
+      "modelo_baseline": "OLS",
+      "rmse_baseline": 0.6146,
+      "rmse_randomforest": 0.5566,
+      "diferencia_rmse": 0.0580,
+      "mejora_porcentaje": "9.4%",
+      "interpretacion": "RandomForest mejora 9.4% respecto a OLS"
+    },
+    "recomendaciones": [
+      "Usar RandomForest como modelo de producción",
+      "Considerar tuning de hiperparámetros para mejora adicional",
+      "Implementar feature importance para interpretabilidad",
+      "Monitorear desempeño con nuevos datos mensuales"
+    ]
+  },
+
+  "visualizaciones_generadas": {
+    "descripcion": "Gráficos y análisis visuales generados",
+    "directorio": "supervised/reports/eda_figures/",
+    "archivos": [
+      {
+        "nombre": "supervisado_predicho_vs_real.png",
+        "descripcion": "Scatter plot: Valores predichos vs valores reales para todos los modelos",
+        "utilidad": "Visualizar calidad de predicciones y distribución de errores"
+      },
+      {
+        "nombre": "supervisado_residuales.png",
+        "descripcion": "Análisis de residuales para todos los modelos",
+        "utilidad": "Detectar patrones en los errores y supuestos de regresión"
+      },
+      {
+        "nombre": "supervisado_comparacion_metricas.png",
+        "descripcion": "Comparación visual de RMSE, MAE, R² entre todos los 8 modelos",
+        "utilidad": "Identificar visualmente el modelo ganador"
+      },
+      {
+        "nombre": "supervisado_importancia_randomforest.png",
+        "descripcion": "Feature importance para Random Forest (Top 15 variables)",
+        "utilidad": "Entender qué variables son más relevantes para la predicción"
+      },
+      {
+        "nombre": "supervisado_importancia_gradientboosting.png",
+        "descripcion": "Feature importance para Gradient Boosting (Top 15 variables)",
+        "utilidad": "Comparar relevancia de features en otro modelo"
+      }
+    ]
+  },
+
+  "archivos_exportados": {
+    "descripcion": "Archivos de resultados generados",
+    "tabla_comparativa": {
+      "nombre": "tabla_comparativa_modelos_supervisados.csv",
+      "ubicacion": "supervised/reports/",
+      "contenido": "Métricas de todos los 8 modelos (RMSE, MAE, R², MAPE) para comparación"
+    }
+  },
+
+  "conclusiones": {
+    "descripcion": "Resumen de hallazgos y próximos pasos",
+    "hallazgos_clave": [
+      "RandomForest es el mejor modelo con R² de 0.9284 en test set",
+      "Dataset mensual de 18,612 registros proporciona suficientes datos para entrenamiento",
+      "El modelo predice tasa de deserción con 4.32% de error (MAPE)",
+      "Variables más importantes: spadies_td_anual_* (tasas de deserción por tipo)",
+      "Los datos mensuales capturan variaciones temporales importantes"
+    ],
+    "proximos_pasos": [
+      "1. Tuning de hiperparámetros para RandomForest",
+      "2. Ensemble de modelos (votación entre top 3: RF, KNN, GB)",
+      "3. Análisis de residuales para identificar patrones",
+      "4. Feature selection para simplificar modelo",
+      "5. Bootstrap para intervalos de confianza",
+      "6. SHAP values para interpretabilidad local",
+      "7. Validación estratificada por departamento/año"
+    ],
+    "consideraciones_tecnicas": [
+      "Reproducibilidad: Random state = 42 en todos los modelos",
+      "Dataset: Mensual completo (18,612 registros)",
+      "Validación: 5-Fold Cross-Validation",
+      "Imputación: Media para valores nulos (792 valores)",
+      "Variables predictoras: 27 features después de limpieza",
+      "Target: outcome_tasa_desercion_snies"
+    ]
+  },
+
+  "resumen_ejecucion": {
+    "estado": "COMPLETADO EXITOSAMENTE",
+    "fecha": "2026-05-18",
+    "tiempo_ejecucion": "Pipeline completo ejecutado",
+    "modelos_evaluados": 8,
+    "registros_procesados": 18612,
+    "features_utilizadas": 27,
+    "mejor_modelo": "RandomForest",
+    "mejora_vs_baseline": "9.4%"
+  }
+}

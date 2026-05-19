@@ -1,0 +1,296 @@
+{
+  "resumen_ejecutivo": {
+    "titulo": "Predicción de Deserción Estudiantil en Colombia",
+    "subtitulo": "Pipeline Supervisado - Análisis de 18,612 Registros Mensuales",
+    "fecha": "2026-05-18",
+    "estado": "COMPLETADO EXITOSAMENTE ✅"
+  },
+
+  "dataset": {
+    "tipo": "Mensual (No Agregado)",
+    "total_registros": 18612,
+    "formula": "33 departamentos × 47 años (1980-2026) × 12 meses",
+    "detalles": {
+      "departamentos": 33,
+      "anos": 47,
+      "meses": 12,
+      "granularidad": "Mensual"
+    },
+    "limpieza": {
+      "columnas_originales": 34,
+      "columnas_eliminadas": 2,
+      "columnas_finales": 32,
+      "features_utilizados": 27,
+      "valores_nulos_tratados": 792,
+      "estrategia_nulos": "Imputación con media"
+    }
+  },
+
+  "target": {
+    "nombre": "outcome_tasa_desercion_snies",
+    "descripcion": "Tasa de deserción estudiantil a nivel nacional",
+    "unidad": "Porcentaje (%)",
+    "estadisticas": {
+      "media": 10.2505,
+      "desv_estandar": 2.0645,
+      "minimo": "~3.99%",
+      "maximo": "~17.26%"
+    }
+  },
+
+  "metodologia": {
+    "enfoque": "Supervised Learning - Regression",
+    "split_datos": "80% Train (14,889) / 20% Test (3,723)",
+    "validacion_cruzada": "5-Fold Cross Validation",
+    "normalizacion": "StandardScaler",
+    "reproducibilidad": "Random state = 42"
+  },
+
+  "modelos_evaluados": {
+    "total": 8,
+    "categorias": {
+      "regresion_lineal": ["OLS", "Ridge", "Lasso", "ElasticNet"],
+      "arboles": ["RandomForest", "GradientBoosting"],
+      "kernel": ["SVR"],
+      "instancia": ["KNN"]
+    }
+  },
+
+  "resultados_validacion_cruzada": {
+    "mejor_modelo": "RandomForest",
+    "metricas": {
+      "rmse": "0.7552 ± 0.0063",
+      "mae": "0.4392 ± 0.0079",
+      "r2": "0.9233 ± 0.0029"
+    },
+    "ranking": [
+      "1. 🥇 RandomForest (RMSE: 0.7552)",
+      "2. 🥈 KNN (RMSE: 0.7730)",
+      "3. 🥉 GradientBoosting (RMSE: 0.7815)"
+    ]
+  },
+
+  "resultados_test_set": {
+    "mejor_modelo": "RandomForest",
+    "metricas_test": {
+      "rmse": 0.5566,
+      "mae": 0.4334,
+      "r2": 0.9284,
+      "mape": "4.32%"
+    },
+    "interpretacion": {
+      "r2": "El modelo explica 92.84% de la varianza en la tasa de deserción",
+      "rmse": "El error promedio es de 0.56 puntos porcentuales",
+      "mape": "En promedio, las predicciones tienen un error de 4.32%",
+      "mae": "Error absoluto medio de 0.43 puntos porcentuales"
+    },
+    "ranking_test": [
+      "1. 🥇 RandomForest (RMSE: 0.5566, R²: 0.9284)",
+      "2. 🥈 KNN (RMSE: 0.5751, R²: 0.9235)",
+      "3. 🥉 GradientBoosting (RMSE: 0.6002, R²: 0.9167)"
+    ]
+  },
+
+  "modelo_ganador_detallado": {
+    "nombre": "RandomForest",
+    "razon_victoria": "Mejor desempeño en CV y Test Set",
+    "ventajas": [
+      "✅ Captura relaciones no-lineales",
+      "✅ Maneja bien series temporales mensuales",
+      "✅ Feature importance interpretable",
+      "✅ Robusto ante outliers",
+      "✅ Reduce overfitting con validación cruzada"
+    ],
+    "metricas_resumen": {
+      "cv_rmse": "0.7552 ± 0.0063",
+      "test_rmse": 0.5566,
+      "test_r2": 0.9284,
+      "test_mape": "4.32%",
+      "test_mae": 0.4334
+    },
+    "mejora_vs_baseline": {
+      "baseline": "OLS",
+      "rmse_baseline": 0.6146,
+      "rmse_rf": 0.5566,
+      "mejora_absoluta": 0.0580,
+      "mejora_porcentaje": "9.4%",
+      "conclusion": "RandomForest mejora 9.4% el RMSE respecto a OLS"
+    }
+  },
+
+  "variables_mas_importantes": {
+    "descripcion": "Top 5 features por correlación con target",
+    "top_5": [
+      {
+        "ranking": 1,
+        "nombre": "spadies_td_anual_tecnico_profesional",
+        "correlacion": 0.8839,
+        "tipo": "Variable de deserción educativa"
+      },
+      {
+        "ranking": 2,
+        "nombre": "spadies_td_anual_tecnologico",
+        "correlacion": 0.8736,
+        "tipo": "Variable de deserción educativa"
+      },
+      {
+        "ranking": 3,
+        "nombre": "spadies_td_anual_tyt",
+        "correlacion": 0.8635,
+        "tipo": "Variable de deserción educativa (Técnica y Tecnológica)"
+      },
+      {
+        "ranking": 4,
+        "nombre": "pib_total_miles_millones_cop",
+        "correlacion": 0.4590,
+        "tipo": "Variable económica"
+      },
+      {
+        "ranking": 5,
+        "nombre": "ipc_capital_total_var_mensual_media",
+        "correlacion": 0.4241,
+        "tipo": "Variable macroeconómica"
+      }
+    ]
+  },
+
+  "comparativa_todos_modelos": {
+    "descripcion": "Resumen de desempeño en Test Set",
+    "tabla": [
+      {
+        "ranking": 1,
+        "modelo": "RandomForest",
+        "rmse": 0.5566,
+        "mae": 0.4334,
+        "r2": 0.9284,
+        "mape": "4.32%",
+        "recomendacion": "🔴 USAR EN PRODUCCIÓN"
+      },
+      {
+        "ranking": 2,
+        "modelo": "KNN",
+        "rmse": 0.5751,
+        "mae": 0.4224,
+        "r2": 0.9235,
+        "mape": "4.16%",
+        "recomendacion": "Alternativa válida"
+      },
+      {
+        "ranking": 3,
+        "modelo": "GradientBoosting",
+        "rmse": 0.6002,
+        "mae": 0.4809,
+        "r2": 0.9167,
+        "mape": "4.78%",
+        "recomendacion": "Ensemble posible"
+      },
+      {
+        "ranking": 4,
+        "modelo": "SVR",
+        "rmse": 0.6060,
+        "mae": 0.4784,
+        "r2": 0.9151,
+        "mape": "4.75%"
+      },
+      {
+        "ranking": 5,
+        "modelo": "OLS (Baseline)",
+        "rmse": 0.6146,
+        "mae": 0.4924,
+        "r2": 0.9126,
+        "mape": "4.89%",
+        "recomendacion": "Referencia"
+      },
+      {
+        "ranking": 6,
+        "modelo": "Ridge",
+        "rmse": 0.6147,
+        "mae": 0.4924,
+        "r2": 0.9126,
+        "mape": "4.89%"
+      },
+      {
+        "ranking": 7,
+        "modelo": "ElasticNet",
+        "rmse": 0.6220,
+        "mae": 0.4991,
+        "r2": 0.9105,
+        "mape": "5.02%"
+      },
+      {
+        "ranking": 8,
+        "modelo": "Lasso",
+        "rmse": 0.6308,
+        "mae": 0.5058,
+        "r2": 0.9080,
+        "mape": "5.10%"
+      }
+    ]
+  },
+
+  "hallazgos_clave": [
+    "✅ Dataset mensual (18,612 registros) proporciona suficiente información",
+    "✅ RandomForest es claramente el mejor modelo (9.4% mejora vs baseline)",
+    "✅ Variables de deserción educativa son predictores fuertes (r > 0.86)",
+    "✅ El modelo explica 92.84% de la varianza (R² excelente)",
+    "✅ Error de predicción promedio es bajo (4.32% MAPE)",
+    "✅ Datos mensuales capturan variaciones temporales importantes",
+    "✅ Baja variancia en CV indica modelo estable"
+  ],
+
+  "recomendaciones": {
+    "inmediatas": [
+      "1. Desplegar RandomForest en producción",
+      "2. Monitorear con nuevos datos mensuales",
+      "3. Documentar feature importance para stakeholders"
+    ],
+    "corto_plazo": [
+      "4. Tuning de hiperparámetros de RandomForest",
+      "5. Crear ensemble con RF + KNN + GB",
+      "6. Implementar SHAP values para explicabilidad"
+    ],
+    "mediano_plazo": [
+      "7. Validación estratificada por departamento",
+      "8. Análisis de predicciones por región geográfica",
+      "9. Integración con sistema de alertas temprana"
+    ],
+    "largo_plazo": [
+      "10. Reentrenamiento automático con nuevos datos",
+      "11. A/B testing con modelos complementarios",
+      "12. Incorporar variables adicionales (sociales, políticas)"
+    ]
+  },
+
+  "archivos_generados": {
+    "json": "pipeline_results.json (completo)",
+    "csv": "tabla_comparativa_modelos_supervisados.csv",
+    "graficos": [
+      "supervisado_predicho_vs_real.png",
+      "supervisado_residuales.png",
+      "supervisado_comparacion_metricas.png",
+      "supervisado_importancia_randomforest.png",
+      "supervisado_importancia_gradientboosting.png"
+    ]
+  },
+
+  "resumen_ejecucion": {
+    "dataset_utilizado": "data_simulado_1980_2026.csv (mensual)",
+    "registros_procesados": 18612,
+    "features_utilizadas": 27,
+    "modelos_entrenados": 8,
+    "mejor_modelo": "RandomForest",
+    "r2_test": 0.9284,
+    "rmse_test": 0.5566,
+    "mape_test": "4.32%",
+    "mejora_vs_baseline": "9.4%",
+    "estado": "✅ COMPLETADO Y VALIDADO"
+  },
+
+  "proximas_acciones": [
+    "→ Revisar las visualizaciones en reports/eda_figures/",
+    "→ Analizar feature importance para explicabilidad",
+    "→ Considerar tuning de hiperparámetros",
+    "→ Planificar ensemble de modelos",
+    "→ Documentar hallazgos en reportes finales"
+  ]
+}
