@@ -495,11 +495,12 @@ def generar_visualizaciones(df: pd.DataFrame,
             scatter = ax.scatter(df_plot["indice_vulnerabilidad_pca"],
                                df_plot["outcome_tasa_desercion_snies"] * 100,
                                s=100, alpha=0.6, edgecolors='black', linewidth=1)
+            '''
             for idx, row in df_plot.iterrows():
                 ax.annotate(row["departamento"][:3], 
                            (row["indice_vulnerabilidad_pca"], row["outcome_tasa_desercion_snies"]*100),
                            fontsize=7, alpha=0.7)
-            
+            '''
             ax.set_xlabel("Índice de Vulnerabilidad (PCA)")
             ax.set_ylabel("Tasa de Deserción (%)")
             ax.set_title("Índice PCA vs. Outcome (Tasa de Deserción)")
@@ -519,11 +520,12 @@ def generar_visualizaciones(df: pd.DataFrame,
             ax.scatter(df_plot["indice_vulnerabilidad_teorico"],
                       df_plot["outcome_tasa_desercion_snies"] * 100,
                       s=100, alpha=0.6, color='green', edgecolors='black', linewidth=1)
+            '''       
             for idx, row in df_plot.iterrows():
                 ax.annotate(row["departamento"][:3],
                            (row["indice_vulnerabilidad_teorico"], row["outcome_tasa_desercion_snies"]*100),
                            fontsize=7, alpha=0.7)
-            
+            '''
             ax.set_xlabel("Índice de Vulnerabilidad (Teórico)")
             ax.set_ylabel("Tasa de Deserción (%)")
             ax.set_title("Índice Teórico vs. Outcome (Tasa de Deserción)")
@@ -544,11 +546,12 @@ def generar_visualizaciones(df: pd.DataFrame,
             ax.scatter(df_plot["indice_vulnerabilidad_pca"],
                       df_plot["indice_vulnerabilidad_teorico"],
                       s=100, alpha=0.6, color='purple', edgecolors='black', linewidth=1)
+            '''
             for idx, row in df_plot.iterrows():
                 ax.annotate(row["departamento"][:3],
                            (row["indice_vulnerabilidad_pca"], row["indice_vulnerabilidad_teorico"]),
                            fontsize=7, alpha=0.7)
-            
+            '''
             ax.set_xlabel("Índice PCA")
             ax.set_ylabel("Índice Teórico")
             ax.set_title("Comparación: Índice PCA vs. Índice Teórico")
@@ -569,12 +572,12 @@ def generar_visualizaciones(df: pd.DataFrame,
             ax.scatter(df_plot["cluster_km"], df_plot["outcome_tasa_desercion_snies"] * 100,
                       s=150, c=df_plot["cluster_km"], cmap='Set3', 
                       edgecolors='black', linewidth=1, alpha=0.7)
-            
+            '''
             for idx, row in df_plot.iterrows():
                 ax.annotate(row["departamento"][:3],
                            (row["cluster_km"], row["outcome_tasa_desercion_snies"]*100),
                            fontsize=7, alpha=0.7)
-            
+            '''
             ax.set_xlabel("Cluster K-Means")
             ax.set_ylabel("Tasa de Deserción (%)")
             ax.set_title("Clusters K-Means vs. Outcome")
