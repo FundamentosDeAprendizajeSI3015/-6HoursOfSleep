@@ -13,7 +13,7 @@ from pathlib import Path
 
 # ---- Configuración ----
 DATASET_PATH = '../../data/processed/panel_desercion_socioeconomico_completo 1.csv'
-OUTPUT_DIR = '../reports'
+OUTPUT_DIR = '../reports/dataset_original'
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 sns.set_theme(style="whitegrid", palette="muted")
@@ -261,19 +261,48 @@ print("\n[Guardado] 05_correlacion_con_target.png")
 # 8b. Heatmap completo
 df_heat = df_corr_target.copy()
 corr_matrix = df_heat.corr()
-
-fig, ax = plt.subplots(figsize=(14, 12))
+n_vars = len(corr_matrix.columns)
+fig_size = max(10, n_vars * 0.6)
+fig, ax = plt.subplots(figsize=(fig_size, fig_size))
 mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+
 sns.heatmap(
-    corr_matrix, annot=True, fmt=".2f", cmap="coolwarm",
-    cbar=True, square=True, linewidths=0.4, linecolor='lightgray',
-    mask=mask, ax=ax, annot_kws={"size": 8}
+    corr_matrix,
+    annot=True,
+    fmt=".2f",
+    cmap="coolwarm",
+    cbar=True,
+    linewidths=0.4,
+    linecolor='lightgray',
+    mask=mask,
+    ax=ax,
+    annot_kws={"size": 7}
 )
-ax.set_title("Matriz de correlaciones (variables numéricas — filas con target)", fontsize=14, fontweight='bold')
-ax.tick_params(axis='x', rotation=45, labelsize=8)
-ax.tick_params(axis='y', rotation=0, labelsize=8)
+ax.set_title(
+    "Matriz de correlaciones (variables numéricas — filas con target)",
+    fontsize=14,
+    fontweight='bold',
+    pad=20
+)
+ax.set_xticklabels(
+    ax.get_xticklabels(),
+    rotation=45,
+    ha='right',
+    rotation_mode='anchor'
+)
+ax.set_yticklabels(
+    ax.get_yticklabels(),
+    rotation=0
+)
+ax.tick_params(axis='x', labelsize=8)
+ax.tick_params(axis='y', labelsize=8)
+
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, '06_heatmap_correlaciones.png'), dpi=150, bbox_inches='tight')
+plt.savefig(
+    os.path.join(OUTPUT_DIR, '06_heatmap_correlaciones.png'),
+    dpi=200,
+    bbox_inches='tight'
+)
 plt.close()
 print("[Guardado] 06_heatmap_correlaciones.png")
 
@@ -358,78 +387,51 @@ print(df_pib.groupby('anio')[['pib_total_miles_millones_cop',
                                'geih_td_nacional_media_anual']].describe().to_string())
 
 # Evolución de matrícula por departamento
-df_matr = df[df['total_matriculados'].notna()][['departamento', 'anio', 'total_matriculados']]
-df_pivot = df_matr.pivot(index='departamento', columns='anio', values='total_matriculados')
+df_matr = df[df['total_matriculados'].notna()][
+    ['departamento', 'anio', 'total_matriculados']
+]
 
+# Pivot dinámico con agregación
+df_pivot = df_matr.pivot_table(
+    index='departamento',
+    columns='anio',
+    values='total_matriculados',
+    aggfunc='sum'   # o 'mean' según tu caso
+)
+
+# Ordenar años
+df_pivot = df_pivot.sort_index(axis=1)
 fig, ax = plt.subplots(figsize=(12, 7))
+
+# Top 10 departamentos
 top10 = df_pivot.mean(axis=1).nlargest(10).index
+anios = df_pivot.columns
+
 for dept in top10:
     vals = df_pivot.loc[dept]
-    ax.plot([2023, 2024], vals.values, marker='o', label=dept)
+
+    ax.plot(
+        anios,
+        vals.values,
+        marker='o',
+        label=dept
+    )
+
 ax.set_xlabel("Año")
 ax.set_ylabel("Total matriculados")
-ax.set_title("Evolución de matrícula 2023→2024 (Top 10 departamentos)", fontweight='bold')
+ax.set_title(
+    "Evolución de matrícula por departamento",
+    fontweight='bold'
+)
 ax.legend(fontsize=8, loc='upper right')
-ax.xaxis.set_major_locator(mticker.MultipleLocator(1))
+ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, '08_evolucion_matricula.png'), dpi=150)
+plt.savefig(
+    os.path.join(OUTPUT_DIR, '08_evolucion_matricula.png'),
+    dpi=150
+)
 plt.close()
 print("\n[Guardado] 08_evolucion_matricula.png")
-
-# ------------------------------------------
-# 11. Resumen y conclusiones finales
-# ------------------------------------------
-print("\n\n" + "=" * 65)
-print("  RESUMEN Y CONCLUSIONES DEL EDA")
-print("=" * 65)
-
-print("""
-DIMENSIÓN Y ESTRUCTURA
-  • Dataset: 66 observaciones × 33 columnas (panel 33 departamentos × 2 años: 2023-2024)
-  • Variable target (outcome_tasa_desercion_snies): disponible SOLO para 2023 (33 filas)
-  • El año 2024 no tiene target → candidato natural para predicción futura
-
-CALIDAD DE DATOS
-  • Sin filas duplicadas ✓
-  • Variables con alta proporción de nulos:
-    - var_pct_matriculados_vs_anio_previo: 57.6% nulos (no disponible en el primer año del panel)
-    - spadies_* y outcome: ~50% nulos (solo disponibles para 2023)
-    - total_admitidos / matriculados: 15.2% nulos
-  • Las variables IPC nacionales tienen cardinalidad 2 — son macros que toman el mismo valor
-    para todos los departamentos en un mismo año (no discriminan entre deptos).
-
-ESTADÍSTICA DESCRIPTIVA
-  • La tasa de deserción oscila entre 4.7% y 26.3% (media: 9.1%, mediana: 7.9%)
-  • Alta asimetría positiva: pocos departamentos con deserción muy elevada elevan la media
-  • PIB total presenta alta dispersión (CV elevado) — refleja desigualdad regional marcada
-
-OUTLIERS
-  • PIB total: concentración extrema en Bogotá y Antioquia → outliers legítimos (no errores)
-  • Total admitidos/matriculados: misma lógica de concentración urbana
-  • Las variables IPC y GEIH no presentan outliers (son nacionales, sin variación entre deptos)
-
-CORRELACIONES
-  • spadies_td_anual_tecnologico (r=0.61) y proxy_pib_por_matriculado (r=0.86):
-    correlaciones altas, pero no implican leakage directo
-  • geih_td, pib_variacion, ipc_capital: correlaciones moderadas a bajas — variables
-    macroeconómicas genuinamente informativas para el modelo
-
-⚠️  DATA LEAKAGE — CRÍTICO
-  • spadies_td_anual_universitario tiene correlación PERFECTA (r=1.000) con el target
-    → Es exactamente la misma variable renombrada. DEBE EXCLUIRSE del entrenamiento.
-  • outcome_merge_pendiente es una variable técnica de control, no una feature predictiva.
-  • Las demás columnas SPADIES (tyt, técnico, tecnológico) son tasas de otros niveles educativos
-    y requieren evaluación caso a caso — correlaciones moderadas pero no perfectas.
-
-RECOMENDACIONES PARA MODELADO
-  1. Excluir: spadies_td_anual_universitario, outcome_merge_pendiente
-  2. Evaluar exclusión o uso controlado de: spadies_td_anual_tyt, _tecnologico, _tecnico_profesional
-  3. Imputar o eliminar: var_pct_matriculados_vs_anio_previo (57.6% nulos)
-  4. Las variables IPC nacionales aportan poca información cross-seccional; considerar
-     incluirlas como features del año o simplemente usar 'anio' como feature.
-  5. Con solo 33 observaciones útiles (target disponible), priorizar modelos simples
-     o regularizados (Ridge, Lasso, árboles con restricción de profundidad).
-""")
 
 print("Pipeline EDA completado. Todos los gráficos guardados en:", OUTPUT_DIR)
 print("=" * 65)
