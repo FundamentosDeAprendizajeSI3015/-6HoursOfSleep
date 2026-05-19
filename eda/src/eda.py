@@ -12,8 +12,8 @@ import seaborn as sns
 from pathlib import Path
 
 # ---- Configuración ----
-DATASET_PATH = '../data/processed/panel_desercion_socioeconomico_completo 1.csv'
-OUTPUT_DIR = '../reports/eda_figures'
+DATASET_PATH = '../../data/processed/panel_desercion_socioeconomico_completo 1.csv'
+OUTPUT_DIR = '../reports/dataset_original'
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 sns.set_theme(style="whitegrid", palette="muted")
@@ -261,19 +261,48 @@ print("\n[Guardado] 05_correlacion_con_target.png")
 # 8b. Heatmap completo
 df_heat = df_corr_target.copy()
 corr_matrix = df_heat.corr()
-
-fig, ax = plt.subplots(figsize=(14, 12))
+n_vars = len(corr_matrix.columns)
+fig_size = max(10, n_vars * 0.6)
+fig, ax = plt.subplots(figsize=(fig_size, fig_size))
 mask = np.triu(np.ones_like(corr_matrix, dtype=bool))
+
 sns.heatmap(
-    corr_matrix, annot=True, fmt=".2f", cmap="coolwarm",
-    cbar=True, square=True, linewidths=0.4, linecolor='lightgray',
-    mask=mask, ax=ax, annot_kws={"size": 8}
+    corr_matrix,
+    annot=True,
+    fmt=".2f",
+    cmap="coolwarm",
+    cbar=True,
+    linewidths=0.4,
+    linecolor='lightgray',
+    mask=mask,
+    ax=ax,
+    annot_kws={"size": 7}
 )
-ax.set_title("Matriz de correlaciones (variables numéricas — filas con target)", fontsize=14, fontweight='bold')
-ax.tick_params(axis='x', rotation=45, labelsize=8)
-ax.tick_params(axis='y', rotation=0, labelsize=8)
+ax.set_title(
+    "Matriz de correlaciones (variables numéricas — filas con target)",
+    fontsize=14,
+    fontweight='bold',
+    pad=20
+)
+ax.set_xticklabels(
+    ax.get_xticklabels(),
+    rotation=45,
+    ha='right',
+    rotation_mode='anchor'
+)
+ax.set_yticklabels(
+    ax.get_yticklabels(),
+    rotation=0
+)
+ax.tick_params(axis='x', labelsize=8)
+ax.tick_params(axis='y', labelsize=8)
+
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, '06_heatmap_correlaciones.png'), dpi=150, bbox_inches='tight')
+plt.savefig(
+    os.path.join(OUTPUT_DIR, '06_heatmap_correlaciones.png'),
+    dpi=200,
+    bbox_inches='tight'
+)
 plt.close()
 print("[Guardado] 06_heatmap_correlaciones.png")
 
@@ -358,21 +387,49 @@ print(df_pib.groupby('anio')[['pib_total_miles_millones_cop',
                                'geih_td_nacional_media_anual']].describe().to_string())
 
 # Evolución de matrícula por departamento
-df_matr = df[df['total_matriculados'].notna()][['departamento', 'anio', 'total_matriculados']]
-df_pivot = df_matr.pivot(index='departamento', columns='anio', values='total_matriculados')
+df_matr = df[df['total_matriculados'].notna()][
+    ['departamento', 'anio', 'total_matriculados']
+]
 
+# Pivot dinámico con agregación
+df_pivot = df_matr.pivot_table(
+    index='departamento',
+    columns='anio',
+    values='total_matriculados',
+    aggfunc='sum'   # o 'mean' según tu caso
+)
+
+# Ordenar años
+df_pivot = df_pivot.sort_index(axis=1)
 fig, ax = plt.subplots(figsize=(12, 7))
+
+# Top 10 departamentos
 top10 = df_pivot.mean(axis=1).nlargest(10).index
+anios = df_pivot.columns
+
 for dept in top10:
     vals = df_pivot.loc[dept]
-    ax.plot([2023, 2024], vals.values, marker='o', label=dept)
+
+    ax.plot(
+        anios,
+        vals.values,
+        marker='o',
+        label=dept
+    )
+
 ax.set_xlabel("Año")
 ax.set_ylabel("Total matriculados")
-ax.set_title("Evolución de matrícula 2023→2024 (Top 10 departamentos)", fontweight='bold')
+ax.set_title(
+    "Evolución de matrícula por departamento",
+    fontweight='bold'
+)
 ax.legend(fontsize=8, loc='upper right')
-ax.xaxis.set_major_locator(mticker.MultipleLocator(1))
+ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
 plt.tight_layout()
-plt.savefig(os.path.join(OUTPUT_DIR, '08_evolucion_matricula.png'), dpi=150)
+plt.savefig(
+    os.path.join(OUTPUT_DIR, '08_evolucion_matricula.png'),
+    dpi=150
+)
 plt.close()
 print("\n[Guardado] 08_evolucion_matricula.png")
 
