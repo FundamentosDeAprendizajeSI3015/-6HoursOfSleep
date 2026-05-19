@@ -13,6 +13,7 @@
 
 import os
 import sys
+import json
 from pathlib import Path
 import pandas as pd
 import numpy as np
@@ -28,9 +29,9 @@ from sklearn.preprocessing import StandardScaler
 # ── Rutas ─────────────────────────────────────────────────────────────────────
 
 BASE_DIR = Path(__file__).parent.parent.parent
-DATA_PROCESSED = BASE_DIR / "data" / "processed"
-DATA_FINAL = BASE_DIR / "data" / "final"
-REPORTS_DIR = Path("../reports")
+DATA_PROCESSED = BASE_DIR / "data_simulada" / "processed"
+DATA_FINAL = BASE_DIR / "data_simulada" / "final"
+REPORTS_DIR = Path(__file__).parent.parent / "reports" / "dataset_simulado"
 
 # Crear carpeta final si no existe
 DATA_FINAL.mkdir(parents=True, exist_ok=True)
@@ -436,35 +437,53 @@ def generar_visualizaciones(df: pd.DataFrame,
         
         # 1b. Biplot PC1 vs PC2
         if X_pca.shape[1] >= 2 and variables and len(variables) > 0:
-            fig, ax = plt.subplots(figsize=(11, 8))
+            fig, ax = plt.subplots(figsize=(12, 9))
             
             # Plotear observaciones coloreadas por outcome
             colors = df.loc[idx_pca, "outcome_tasa_desercion_snies"].fillna(0)
             scatter = ax.scatter(X_pca[:, 0], X_pca[:, 1], c=colors, cmap='RdYlGn_r',
                                s=80, alpha=0.6, edgecolors='black', linewidth=0.5)
             
-            # Plotear flechas de cargas (loadings)
+            # Plotear flechas de cargas (loadings) con etiquetas sin sobreposición
             loadings = pca.components_.T * np.sqrt(pca.explained_variance_)
-            for i, var in enumerate(variables[:7]):  # Limitar a 7 variables por claridad
-                ax.arrow(0, 0, loadings[i, 0]*3, loadings[i, 1]*3,
-                        head_width=0.15, head_length=0.15, fc='red', ec='red', alpha=0.6)
-                ax.text(loadings[i, 0]*3.3, loadings[i, 1]*3.3, var[:18],
-                       fontsize=7, ha='center', va='center',
-                       bbox=dict(boxstyle='round,pad=0.3', facecolor='yellow', alpha=0.3))
+            n_vars = min(len(variables), 7)  # Limitar a 7 variables por claridad
+            
+            # Calcular ángulos para distribuir etiquetas uniformemente
+            for i, var in enumerate(variables[:n_vars]):
+                arrow_len = 3.0
+                # Flecha
+                ax.arrow(0, 0, loadings[i, 0]*arrow_len, loadings[i, 1]*arrow_len,
+                        head_width=0.15, head_length=0.15, fc='red', ec='red', alpha=0.7, zorder=3)
+                
+                # Posicionar etiqueta a mayor distancia para evitar sobreposición
+                label_distance = 4.2
+                ax.text(loadings[i, 0]*label_distance, loadings[i, 1]*label_distance, 
+                       var[:20],
+                       fontsize=8, ha='center', va='center', weight='bold',
+                       bbox=dict(boxstyle='round,pad=0.4', facecolor='yellow', 
+                                alpha=0.75, edgecolor='red', linewidth=1),
+                       zorder=4)
+                
+                # Línea de conexión desde punta de flecha a etiqueta (opcional, para claridad)
+                ax.plot([loadings[i, 0]*arrow_len, loadings[i, 0]*label_distance],
+                       [loadings[i, 1]*arrow_len, loadings[i, 1]*label_distance],
+                       'r--', alpha=0.4, linewidth=0.8, zorder=2)
             
             ax.axhline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.3)
             ax.axvline(0, color='k', linestyle='-', linewidth=0.5, alpha=0.3)
-            ax.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%})')
-            ax.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%})')
-            ax.set_title('Biplot PCA - Observaciones y Cargas de Variables')
+            ax.set_xlabel(f'PC1 ({pca.explained_variance_ratio_[0]:.1%})', fontsize=12, weight='bold')
+            ax.set_ylabel(f'PC2 ({pca.explained_variance_ratio_[1]:.1%})', fontsize=12, weight='bold')
+            ax.set_title('Biplot PCA - Observaciones y Cargas de Variables', fontsize=13, weight='bold', pad=20)
             
             cbar = plt.colorbar(scatter, ax=ax)
-            cbar.set_label('Outcome', rotation=270, labelpad=20)
+            cbar.set_label('Tasa de Deserción', rotation=270, labelpad=20)
             
+            ax.grid(True, alpha=0.2)
             plt.tight_layout()
             plt.savefig(REPORTS_DIR / '01b_biplot_pca.png', dpi=150, bbox_inches='tight')
             plt.close()
             print(f"   [Guardado] 01b_biplot_pca.png")
+    
     
     # 2. Índice PCA vs Outcome
     if "indice_vulnerabilidad_pca" in df.columns and "outcome_tasa_desercion_snies" in df.columns:
@@ -566,6 +585,224 @@ def generar_visualizaciones(df: pd.DataFrame,
             print(f"   [Guardado] 04_clusters_vs_outcome.png")
 
 
+# ── Exportación de métricas de rendimiento ────────────────────────────────────
+
+def exportar_metricas_rendimiento(df: pd.DataFrame,
+                                   pca_result: tuple = None,
+                                   variables_indice: list = None,
+                                   df_km_resultados: pd.DataFrame = None,
+                                   k_optimo: int = None,
+                                   cargas_pca: pd.Series = None,
+                                   varianza_pca: float = None,
+                                   metricas_km: dict = None,
+                                   metricas_hc: dict = None,
+                                   n_orig: int = None) -> None:
+    """
+    Compila y exporta todas las métricas de rendimiento del pipeline
+    en un CSV en REPORTS_DIR.
+    
+    Incluye:
+    - Información del dataset (limpieza)
+    - Métricas de PCA
+    - Métricas de índices (correlación con outcome)
+    - Métricas de clustering
+    - Resultados de validación
+    """
+    
+    metricas_dict = {}
+    
+    # === INFORMACIÓN DEL DATASET ===
+    metricas_dict["DATASET_INFO_original_rows"] = n_orig if n_orig else "N/A"
+    metricas_dict["DATASET_INFO_final_rows"] = len(df)
+    metricas_dict["DATASET_INFO_final_columns"] = df.shape[1]
+    metricas_dict["DATASET_INFO_rows_retained_pct"] = (
+        f"{100 * len(df) / n_orig:.1f}%" if n_orig else "N/A"
+    )
+    
+    # Cálculo de nulos promedio
+    null_pct_promedio = df.isnull().sum().sum() / (df.shape[0] * df.shape[1]) * 100
+    metricas_dict["DATASET_INFO_null_percentage"] = f"{null_pct_promedio:.2f}%"
+    
+    # === INFORMACIÓN DE PCA ===
+    if pca_result is not None and pca_result[0] is not None:
+        pca, X_pca, varianza_acum, idx_pca, scaler = pca_result
+        metricas_dict["PCA_n_components_analyzed"] = pca.n_components_
+        metricas_dict["PCA_PC1_variance_explained"] = f"{pca.explained_variance_ratio_[0]:.4f}"
+        if len(pca.explained_variance_ratio_) > 1:
+            metricas_dict["PCA_PC2_variance_explained"] = f"{pca.explained_variance_ratio_[1]:.4f}"
+            metricas_dict["PCA_PC1_PC2_cumulative_variance"] = f"{varianza_acum[1]:.4f}"
+        else:
+            metricas_dict["PCA_PC2_variance_explained"] = "N/A"
+            metricas_dict["PCA_PC1_PC2_cumulative_variance"] = f"{varianza_acum[0]:.4f}"
+    else:
+        metricas_dict["PCA_n_components_analyzed"] = "N/A"
+        metricas_dict["PCA_PC1_variance_explained"] = "N/A"
+        metricas_dict["PCA_PC2_variance_explained"] = "N/A"
+        metricas_dict["PCA_PC1_PC2_cumulative_variance"] = "N/A"
+    
+    # === INFORMACIÓN DE VARIABLES ===
+    if variables_indice:
+        metricas_dict["VARIABLES_n_in_index"] = len(variables_indice)
+        metricas_dict["VARIABLES_list"] = ", ".join(variables_indice)
+    else:
+        metricas_dict["VARIABLES_n_in_index"] = 0
+        metricas_dict["VARIABLES_list"] = "N/A"
+    
+    # === INFORMACIÓN DE ÍNDICES ===
+    if "indice_vulnerabilidad_pca" in df.columns and "outcome_tasa_desercion_snies" in df.columns:
+        df_clean_pca = df[["indice_vulnerabilidad_pca", "outcome_tasa_desercion_snies"]].dropna()
+        if len(df_clean_pca) > 0:
+            rho_pca, p_pca = spearmanr(
+                df_clean_pca["indice_vulnerabilidad_pca"],
+                df_clean_pca["outcome_tasa_desercion_snies"]
+            )
+            metricas_dict["INDEX_PCA_spearman_rho"] = f"{rho_pca:.4f}"
+            metricas_dict["INDEX_PCA_spearman_p_value"] = f"{p_pca:.6f}"
+            metricas_dict["INDEX_PCA_n_observations"] = len(df_clean_pca)
+        else:
+            metricas_dict["INDEX_PCA_spearman_rho"] = "N/A"
+            metricas_dict["INDEX_PCA_spearman_p_value"] = "N/A"
+            metricas_dict["INDEX_PCA_n_observations"] = 0
+    else:
+        metricas_dict["INDEX_PCA_spearman_rho"] = "N/A"
+        metricas_dict["INDEX_PCA_spearman_p_value"] = "N/A"
+        metricas_dict["INDEX_PCA_n_observations"] = 0
+    
+    if "indice_vulnerabilidad_teorico" in df.columns and "outcome_tasa_desercion_snies" in df.columns:
+        df_clean_teo = df[["indice_vulnerabilidad_teorico", "outcome_tasa_desercion_snies"]].dropna()
+        if len(df_clean_teo) > 0:
+            rho_teo, p_teo = spearmanr(
+                df_clean_teo["indice_vulnerabilidad_teorico"],
+                df_clean_teo["outcome_tasa_desercion_snies"]
+            )
+            metricas_dict["INDEX_THEORETICAL_spearman_rho"] = f"{rho_teo:.4f}"
+            metricas_dict["INDEX_THEORETICAL_spearman_p_value"] = f"{p_teo:.6f}"
+            metricas_dict["INDEX_THEORETICAL_n_observations"] = len(df_clean_teo)
+        else:
+            metricas_dict["INDEX_THEORETICAL_spearman_rho"] = "N/A"
+            metricas_dict["INDEX_THEORETICAL_spearman_p_value"] = "N/A"
+            metricas_dict["INDEX_THEORETICAL_n_observations"] = 0
+    else:
+        metricas_dict["INDEX_THEORETICAL_spearman_rho"] = "N/A"
+        metricas_dict["INDEX_THEORETICAL_spearman_p_value"] = "N/A"
+        metricas_dict["INDEX_THEORETICAL_n_observations"] = 0
+    
+    # === INFORMACIÓN DE CLUSTERING K-MEANS ===
+    metricas_dict["CLUSTERING_KMEANS_optimal_k"] = k_optimo if k_optimo else "N/A"
+    
+    if df_km_resultados is not None and len(df_km_resultados) > 0:
+        metricas_dict["CLUSTERING_KMEANS_k_range_tested"] = f"{df_km_resultados['k'].min()}-{df_km_resultados['k'].max()}"
+        best_idx = df_km_resultados["silhouette"].idxmax()
+        metricas_dict["CLUSTERING_KMEANS_best_silhouette_score"] = f"{df_km_resultados.loc[best_idx, 'silhouette']:.4f}"
+        metricas_dict["CLUSTERING_KMEANS_best_calinski_harabasz"] = f"{df_km_resultados.loc[best_idx, 'calinski_harabasz']:.4f}"
+        
+        # Información del k óptimo
+        if k_optimo and k_optimo in df_km_resultados['k'].values:
+            k_row = df_km_resultados[df_km_resultados['k'] == k_optimo].iloc[0]
+            metricas_dict["CLUSTERING_KMEANS_at_optimal_k_silhouette"] = f"{k_row['silhouette']:.4f}"
+            metricas_dict["CLUSTERING_KMEANS_at_optimal_k_calinski"] = f"{k_row['calinski_harabasz']:.4f}"
+            metricas_dict["CLUSTERING_KMEANS_at_optimal_k_inertia"] = f"{k_row['inertia']:.4f}"
+    else:
+        metricas_dict["CLUSTERING_KMEANS_k_range_tested"] = "N/A"
+        metricas_dict["CLUSTERING_KMEANS_best_silhouette_score"] = "N/A"
+        metricas_dict["CLUSTERING_KMEANS_best_calinski_harabasz"] = "N/A"
+        metricas_dict["CLUSTERING_KMEANS_at_optimal_k_silhouette"] = "N/A"
+        metricas_dict["CLUSTERING_KMEANS_at_optimal_k_calinski"] = "N/A"
+        metricas_dict["CLUSTERING_KMEANS_at_optimal_k_inertia"] = "N/A"
+    
+    # === VALIDACIÓN DE ETIQUETAS (ARI) ===
+    if metricas_km and "ari" in metricas_km:
+        metricas_dict["VALIDATION_KMEANS_ARI_score"] = f"{metricas_km['ari']:.4f}"
+        metricas_dict["VALIDATION_KMEANS_n_quartiles"] = metricas_km.get("n_cuartiles", "N/A")
+    else:
+        metricas_dict["VALIDATION_KMEANS_ARI_score"] = "N/A"
+        metricas_dict["VALIDATION_KMEANS_n_quartiles"] = "N/A"
+    
+    if metricas_hc and "ari" in metricas_hc:
+        metricas_dict["VALIDATION_HIERARCHICAL_ARI_score"] = f"{metricas_hc['ari']:.4f}"
+        metricas_dict["VALIDATION_HIERARCHICAL_n_quartiles"] = metricas_hc.get("n_cuartiles", "N/A")
+    else:
+        metricas_dict["VALIDATION_HIERARCHICAL_ARI_score"] = "N/A"
+        metricas_dict["VALIDATION_HIERARCHICAL_n_quartiles"] = "N/A"
+    
+    # === CONVERSIÓN A DATAFRAME Y EXPORTACIÓN ===
+    df_metricas = pd.DataFrame([metricas_dict]).T
+    df_metricas.columns = ["Valor"]
+    df_metricas.index.name = "Métrica"
+    
+    output_path = REPORTS_DIR / "metricas_rendimiento.csv"
+    df_metricas.to_csv(output_path, encoding='utf-8-sig')
+    print(f"\n✅ Métricas de rendimiento exportadas: {output_path}")
+    
+    # También generar un resumen más legible en formato largo
+    output_path_resumen = REPORTS_DIR / "metricas_rendimiento_resumen.txt"
+    with open(output_path_resumen, 'w', encoding='utf-8') as f:
+        f.write("="*70 + "\n")
+        f.write("RESUMEN DE MÉTRICAS DE RENDIMIENTO - ANÁLISIS DE ÍNDICE DE VULNERABILIDAD\n")
+        f.write("="*70 + "\n\n")
+        
+        f.write("INFORMACIÓN DEL DATASET\n")
+        f.write("-" * 70 + "\n")
+        f.write(f"  Filas originales:           {metricas_dict['DATASET_INFO_original_rows']}\n")
+        f.write(f"  Filas finales:              {metricas_dict['DATASET_INFO_final_rows']}\n")
+        f.write(f"  Columnas finales:           {metricas_dict['DATASET_INFO_final_columns']}\n")
+        f.write(f"  Porcentaje de retención:    {metricas_dict['DATASET_INFO_rows_retained_pct']}\n")
+        f.write(f"  Porcentaje de nulos:        {metricas_dict['DATASET_INFO_null_percentage']}\n\n")
+        
+        f.write("ANÁLISIS PCA\n")
+        f.write("-" * 70 + "\n")
+        f.write(f"  Componentes analizadas:     {metricas_dict['PCA_n_components_analyzed']}\n")
+        f.write(f"  Varianza PC1:               {metricas_dict['PCA_PC1_variance_explained']}\n")
+        f.write(f"  Varianza PC2:               {metricas_dict['PCA_PC2_variance_explained']}\n")
+        f.write(f"  Varianza acumulada (PC1+PC2): {metricas_dict['PCA_PC1_PC2_cumulative_variance']}\n\n")
+        
+        f.write("VARIABLES EN EL ÍNDICE\n")
+        f.write("-" * 70 + "\n")
+        f.write(f"  Total de variables:         {metricas_dict['VARIABLES_n_in_index']}\n")
+        f.write(f"  Variables:\n")
+        if metricas_dict['VARIABLES_list'] != "N/A":
+            for var in metricas_dict['VARIABLES_list'].split(", "):
+                f.write(f"    - {var}\n")
+        f.write("\n")
+        
+        f.write("ÍNDICE PCA\n")
+        f.write("-" * 70 + "\n")
+        f.write(f"  Correlación Spearman (rho): {metricas_dict['INDEX_PCA_spearman_rho']}\n")
+        f.write(f"  P-valor:                    {metricas_dict['INDEX_PCA_spearman_p_value']}\n")
+        f.write(f"  Observaciones:              {metricas_dict['INDEX_PCA_n_observations']}\n\n")
+        
+        f.write("ÍNDICE TEÓRICO\n")
+        f.write("-" * 70 + "\n")
+        f.write(f"  Correlación Spearman (rho): {metricas_dict['INDEX_THEORETICAL_spearman_rho']}\n")
+        f.write(f"  P-valor:                    {metricas_dict['INDEX_THEORETICAL_spearman_p_value']}\n")
+        f.write(f"  Observaciones:              {metricas_dict['INDEX_THEORETICAL_n_observations']}\n\n")
+        
+        f.write("CLUSTERING K-MEANS\n")
+        f.write("-" * 70 + "\n")
+        f.write(f"  K óptimo:                   {metricas_dict['CLUSTERING_KMEANS_optimal_k']}\n")
+        f.write(f"  Rango de k probado:         {metricas_dict['CLUSTERING_KMEANS_k_range_tested']}\n")
+        f.write(f"  Mejor silhouette score:     {metricas_dict['CLUSTERING_KMEANS_best_silhouette_score']}\n")
+        f.write(f"  Mejor calinski-harabasz:    {metricas_dict['CLUSTERING_KMEANS_best_calinski_harabasz']}\n")
+        f.write(f"  Silhouette (en k óptimo):   {metricas_dict['CLUSTERING_KMEANS_at_optimal_k_silhouette']}\n")
+        f.write(f"  Calinski-Harabasz (k ópt):  {metricas_dict['CLUSTERING_KMEANS_at_optimal_k_calinski']}\n")
+        f.write(f"  Inertia (k óptimo):         {metricas_dict['CLUSTERING_KMEANS_at_optimal_k_inertia']}\n\n")
+        
+        f.write("VALIDACIÓN DE ETIQUETAS\n")
+        f.write("-" * 70 + "\n")
+        f.write(f"  K-Means ARI:                {metricas_dict['VALIDATION_KMEANS_ARI_score']}\n")
+        f.write(f"  Jerárquico ARI:             {metricas_dict['VALIDATION_HIERARCHICAL_ARI_score']}\n")
+        f.write("\n")
+        f.write("="*70 + "\n")
+    
+    print(f"✅ Resumen legible exportado: {output_path_resumen}")
+    
+    # === EXPORTACIÓN A JSON ===
+    output_path_json = REPORTS_DIR / "metricas_rendimiento.json"
+    with open(output_path_json, 'w', encoding='utf-8') as f:
+        json.dump(metricas_dict, f, indent=2, ensure_ascii=False)
+    print(f"✅ Métricas exportadas a JSON: {output_path_json}")
+
+
 # ── Función principal ─────────────────────────────────────────────────────────
 
 def pipeline_completo():
@@ -584,9 +821,10 @@ def pipeline_completo():
     
     # 1. CARGA Y LIMPIEZA
     print("\n📥 Cargando dataset...")
-    df_path = DATA_PROCESSED / "panel_desercion_socioeconomico_completo 1.csv"
+    df_path = DATA_PROCESSED / "data_simulado_1980_2026.csv"
     df = pd.read_csv(df_path)
-    print(f"   Dataset original: {df.shape[0]} filas × {df.shape[1]} columnas")
+    n_filas_original = df.shape[0]
+    print(f"   Dataset original: {n_filas_original} filas × {df.shape[1]} columnas")
     
     df = limpiar_dataset(df, verbose=True)
     
@@ -637,6 +875,21 @@ def pipeline_completo():
     print(f"   ✅ {output_path}")
     print(f"   Dimensiones finales: {df.shape[0]} filas × {df.shape[1]} columnas")
     
+    # 11. EXPORTACIÓN DE MÉTRICAS DE RENDIMIENTO
+    print("\n📊 Compilando y exportando métricas de rendimiento...")
+    exportar_metricas_rendimiento(
+        df=df,
+        pca_result=pca_result,
+        variables_indice=variables_indice,
+        df_km_resultados=df_km_resultados,
+        k_optimo=k_opt,
+        cargas_pca=cargas_pca,
+        varianza_pca=varianza_pca,
+        metricas_km=metricas_km,
+        metricas_hc=metricas_hc,
+        n_orig=n_filas_original
+    )
+    
     # Resumen
     print("\n" + "="*70)
     print("  RESUMEN DEL ANÁLISIS")
@@ -647,6 +900,7 @@ def pipeline_completo():
     print(f"✅ ARI validación (K-Means): {metricas_km['ari']:.3f}")
     print(f"✅ ARI validación (Jerárquico): {metricas_hc['ari']:.3f}")
     print(f"✅ Dataset exportado: data/final/dataset_con_indice.csv")
+    print(f"✅ Métricas exportadas a: reports/")
     print("\n" + "="*70)
     
     return df

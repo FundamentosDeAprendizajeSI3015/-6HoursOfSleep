@@ -1,0 +1,59 @@
+======================================================================
+RESUMEN DE MÉTRICAS DE RENDIMIENTO - ANÁLISIS DE ÍNDICE DE VULNERABILIDAD
+======================================================================
+
+INFORMACIÓN DEL DATASET
+----------------------------------------------------------------------
+  Filas originales:           66
+  Filas finales:              66
+  Columnas finales:           37
+  Porcentaje de retención:    100.0%
+  Porcentaje de nulos:        18.55%
+
+ANÁLISIS PCA
+----------------------------------------------------------------------
+  Componentes analizadas:     2
+  Varianza PC1:               0.4476
+  Varianza PC2:               0.2764
+  Varianza acumulada (PC1+PC2): 0.7240
+
+VARIABLES EN EL ÍNDICE
+----------------------------------------------------------------------
+  Total de variables:         7
+  Variables:
+    - geih_td_nacional_media_anual
+    - ipc_nacional_total_var_mensual_media
+    - proxy_pib_miles_mm_cop_por_matriculado
+    - total_matriculados
+    - spadies_td_anual_tecnologico
+    - pib_variacion_pct_anual_vs_anio_previo
+    - geih_to_nacional_media_anual
+
+ÍNDICE PCA
+----------------------------------------------------------------------
+  Correlación Spearman (rho): 0.4719
+  P-valor:                    0.012947
+  Observaciones:              27
+
+ÍNDICE TEÓRICO
+----------------------------------------------------------------------
+  Correlación Spearman (rho): 0.1637
+  P-valor:                    0.362528
+  Observaciones:              33
+
+CLUSTERING K-MEANS
+----------------------------------------------------------------------
+  K óptimo:                   2
+  Rango de k probado:         2-7
+  Mejor silhouette score:     0.7222
+  Mejor calinski-harabasz:    16.6571
+  Silhouette (en k óptimo):   0.7222
+  Calinski-Harabasz (k ópt):  16.6571
+  Inertia (k óptimo):         64.8149
+
+VALIDACIÓN DE ETIQUETAS
+----------------------------------------------------------------------
+  K-Means ARI:                -0.0017
+  Jerárquico ARI:             -0.0017
+
+======================================================================
