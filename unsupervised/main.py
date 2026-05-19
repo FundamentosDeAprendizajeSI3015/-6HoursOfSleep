@@ -40,7 +40,8 @@ def main():
     print("Objetivo: explorar patrones en los indicadores que puedan apoyar la predicción de la tasa de deserción estudiantil.")
     print("="*70)
 
-    X, y, loader = load_and_prepare()
+    data_path = Path(r"c:\Users\Usuario\Desktop\EAFIT\Semestre 6\Fundamentos de Aprendizaje Automático\-6HoursOfSleep\data_simulada\processed\data_simulado_1980_2026.csv")
+    X, y, loader = load_and_prepare(str(data_path))
     df_base = loader.df_clean.copy()
 
     X_scaled = scale_features(X)
@@ -129,6 +130,34 @@ def main():
     print("   • Gráficos: unsupervised/reports/eda_figures/unsupervised_*.png")
     print("   • Asignaciones: unsupervised/reports/cluster_assignments_*.csv")
     print("   • Validación: unsupervised/reports/unsupervised_validation_summary.csv")
+    print("\n[6/5] Guardando resultados en JSON para el dashboard")
+    docs_path = Path(__file__).parent / "docs"
+    docs_path.mkdir(parents=True, exist_ok=True)
+    
+    import json
+    
+    def replace_nan(obj):
+        if isinstance(obj, float) and np.isnan(obj):
+            return None
+        elif isinstance(obj, dict):
+            return {k: replace_nan(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [replace_nan(i) for i in obj]
+        return obj
+
+    dbscan_list = dbscan_results.to_dict(orient="records") if dbscan_results is not None else []
+    
+    results_json = {
+        "kmeans_results": kmeans_results.to_dict(orient="records"),
+        "dbscan_results": dbscan_list,
+        "agg_metrics": agg_metrics,
+        "validation": df_validation.to_dict(orient="records"),
+    }
+    
+    with open(docs_path / "unsupervised_results.json", "w", encoding="utf-8") as f:
+        json.dump(replace_nan(results_json), f, indent=4, ensure_ascii=False)
+    print(f"   [OK] JSON guardado en: {docs_path / 'unsupervised_results.json'}")
+
     print("\n" + "="*70 + "\n")
 
     return {
