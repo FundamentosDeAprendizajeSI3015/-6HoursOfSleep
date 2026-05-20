@@ -576,24 +576,6 @@ python app.py
    - Inversión por estudiante (PIB/matrícula) correlaciona con outcome
    - Desempleo nacional tiene impacto significativo
 
-### 📊 Implicaciones Operativas
-
-#### Para Formulación de Política
-- **Monitoreo:** Usar Random Forest para alertas tempranas de crisis de deserción
-- **Planificación:** Realizar análisis de sensibilidad variando condiciones macroeconómicas
-- **Acción:** Focalizar intervenciones en departamentos con vulnerabilidad alta (índice PCA/teórico)
-
-#### Para Instituciones Educativas
-- **Predicción:** Anticipar cambios en tasas de deserción 6-12 meses adelante
-- **Segmentación:** Identificar departamentos con perfil similar mediante clustering
-- **Asignación de recursos:** Priorizar programas de retención en regiones de riesgo
-
-#### Para Investigación Futura
-- **Datos granulares:** Recolectar indicadores departamentales (no solo nacionales)
-- **Causalidad:** Realizar estudios quasi-experimentales para validar relaciones causales
-- **Escalabilidad:** Aplicar metodología a nivel municipal o por IES
-- **Machine Learning avanzado:** Explorar LSTM, GBM tuning, SHAP para interpretabilidad local
-
 ### ⚠️ Limitaciones Reconocidas
 
 1. **Simulación introduce dependencias artificiales** — Resultados optimistas respecto a datos completamente reales
